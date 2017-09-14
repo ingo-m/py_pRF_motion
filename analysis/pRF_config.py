@@ -23,24 +23,25 @@ varNumX = 25
 # Number of y-positions to model:
 varNumY = 25
 # Number of pRF sizes to model:
-varNumPrfSizes = 22
+varNumPrfSizes = 30
 
 # Extend of visual space from centre of the screen (i.e. from the fixation
 # point) [degrees of visual angle]:
-varExtXmin = -12.00
-varExtXmax = 12.00
-varExtYmin = -12.00
-varExtYmax = 12.00
+varExtXmin = -5.19
+varExtXmax = 5.19
+varExtYmin = -5.19
+varExtYmax = 5.19
 
 # Maximum and minimum pRF model size (standard deviation of 2D Gaussian)
 # [degrees of visual angle]:
-varPrfStdMin = 1.0
-varPrfStdMax = 22.0
+varPrfStdMin = 0.1
+varPrfStdMax = 10.0
 
 # Volume TR of input data [s]:
-varTr = 3.0
+varTr = 2.832
+
 # Voxel resolution of the fMRI data [mm]:
-varVoxRes = 0.8
+varVoxRes = 0.4
 
 # Extent of temporal smoothing that has been applied to fMRI data
 # [standard deviation of the Gaussian kernel, in seconds]:
@@ -49,10 +50,10 @@ varVoxRes = 0.8
 varSdSmthTmp = 0
 
 # Number of processes to run in parallel:
-varPar = 10
+varPar = 11
 
 # L2 regularisation factor for ridge regression
-varL2reg = 5.0
+varL2reg = 0.0
 
 # Size of high-resolution visual space model in which the pRF models are
 # created (x- and y-dimension). The x and y dimensions specified here need to
@@ -63,35 +64,32 @@ varL2reg = 5.0
 tplVslSpcHighSze = (200, 200)
 
 # Parent path to functional data
-strPathNiiFunc = '/home/john/Documents/pRF_motion/func'
+strPathNiiFunc = '/home/john/Documents/20161221/func_regAcrssRuns_cube_up'
 # list of nii files in parent directory (all nii files together need to have
 # same number of volumes as there are PNGs):
-lstNiiFls = ['demean_rafunc01_hpf.nii',
-             'demean_rafunc02_hpf.nii',
-             'demean_rafunc03_hpf.nii',
-             'demean_rafunc04_hpf.nii',
-             'demean_rafunc05_hpf.nii',
-             'demean_rafunc06_hpf.nii',
-             'demean_rafunc07_hpf.nii',
+lstNiiFls = ['func_07_up_aniso_smth.nii',
+             'func_08_up_aniso_smth.nii',
+             'func_09_up_aniso_smth.nii',
+             'func_10_up_aniso_smth.nii',
              ]
 # which run should be hold out for testing? [python index strating from 0]
-varTestRun = 6
+varTestRun = 5
 
 # Path of mask (to restrict pRF model finding):
-strPathNiiMask = '/home/john/Documents/pRF_motion/func/flatmask.nii.gz'
+strPathNiiMask = '/home/john/Documents/20161221/retinotopy/mask/tmp_gm_evc.nii.gz'
 
 # Output basename:
-strPathOut = '/home/john/Documents/pRF_motion/result/MotionNoXvalAoM_gpu_L2'
+strPathOut = '/home/john/Documents/20161221/retinotopy/pRF_results_motion/pRF_results'
 
 # Which version to use for pRF finding. 'numpy' or 'cython' for pRF finding on
 # CPU, 'gpu' for using GPU.
 strVersion = 'gpu'
 
 # Create pRF time course models?
-lgcCrteMdl = False
+lgcCrteMdl = True
 
 # reduce presented motion direction from 8 to 4?
-lgcAoM = True
+lgcAoM = False
 
 # length of the runs that were done
 vecRunLngth = [172] * len(lstNiiFls)
@@ -124,25 +122,25 @@ if lgcXval:
 # be provided:
 
 # visual stimuli that were used for this run (if everything is well 1,2,3, asf)
-vecVslStim = [1, 2, 3, 4, 5, 6, 7]
+vecVslStim = [1, 2, 3, 4]
 
 # Basename of the filenames that have the presentation orders saved
-strPathPresOrd = '/media/sf_D_DRIVE/MotionLocaliser/UsedPsychoPyScripts/P02/Conditions/Conditions_run0'
+strPathPresOrd = '/home/john/Documents/20161221/retinotopy/design_matrix/Conditions_run0'
 
-# Size of png files (pixel*pixel):
-tplPngSize = (128, 128)
+# Sample PNGs at this resolution (pixel*pixel):
+tplPngSize = tplVslSpcHighSze
 
 # Basename of the 'binary stimulus files'. The files need to be in png
 # format and number in the order of their presentation during the
 # experiment.
-strPathPng = '/media/sf_D_DRIVE/MotionLocaliser/Analysis/P02/PNGs/Ima_'
+strPathPng = '/home/john/Documents/20161221/retinotopy/pRF_stimuli/frame_'
 
 # If we use existing pRF time course models, the path to the respective
 # file has to be provided (including file extension, i.e. '*.npy'):
-strPathMdl = '/home/john/Documents/pRF_motion/model/pRF_model_tc' + strBasis + '.npy'
+strPathMdl = '/home/john/Documents/20161221/retinotopy/design_matrix/pRF_timecourses.npy'
 
 # reduce presented motion direction from 8 to 4?
-lgcAoM = True
+lgcAoM = False
 
 if lgcAoM:
     # number of motion directions

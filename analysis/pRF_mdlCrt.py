@@ -47,6 +47,9 @@ def loadPng(varNumVol, tplPngSize, strPathPng):
     lstPngPaths = [None] * varNumVol
     for idx01 in range(0, varNumVol):
         lstPngPaths[idx01] = (strPathPng + str(idx01) + '.png')
+        # Alternative, if the PNGs are named in old-fashioned style
+        # ('BrainStim' style, i.e. 001, 002, etc.):
+        # lstPngPaths[idx01] = (strPathPng + str(idx01 + 1).zfill(3) + '.png')
 
     # Load png files. The png data will be saved in a numpy array of the
     # following order: aryPngData[x-pixel, y-pixel, PngNumber]. The
@@ -57,10 +60,16 @@ def loadPng(varNumVol, tplPngSize, strPathPng):
                            tplPngSize[1],
                            varNumVol))
     for idx01 in range(0, varNumVol):
-        aryPngData[:, :, idx01] = np.array(Image.open(lstPngPaths[idx01]))
+
+        # Load & resize image:
+        objIm = Image.open(lstPngPaths[idx01])
+        objIm = objIm.resize((tplPngSize[0], tplPngSize[1]),
+                             resample=Image.NEAREST)
+        aryPngData[:, :, idx01] = np.array(objIm.getdata()).reshape(
+            objIm.size[0], objIm.size[1])
 
     # Convert RGB values (0 to 255) to integer ones and zeros:
-    aryPngData = (aryPngData > 0).astype(int)
+    aryPngData = (aryPngData > 0).astype(np.int16)
 
     return aryPngData
 
@@ -122,13 +131,13 @@ def crtPwBoxCarFn(varNumVol, aryPngData, aryPresOrd, vecMtDrctn):
     """
     print('------Create pixel-wise boxcar functions')
     aryBoxCar = np.empty(aryPngData.shape[0:2] + (len(vecMtDrctn),) +
-                         (varNumVol,), dtype='int64')
+                         (varNumVol,), dtype=np.int16)
     for ind, num in enumerate(vecMtDrctn):
-        aryCondTemp = np.zeros((aryPngData.shape), dtype='int64')
+        aryCondTemp = np.zeros((aryPngData.shape), dtype=np.int16)
         lgcTempMtDrctn = [aryPresOrd == num][0]
         aryCondTemp[:, :, lgcTempMtDrctn] = np.copy(
             aryPngData[:, :, lgcTempMtDrctn])
-        aryBoxCar[:, :, ind, :] = aryCondTemp
+        aryBoxCar[:, :, ind, :] = aryCondTemp.astype(np.int16)
 
     return aryBoxCar
 
@@ -204,7 +213,12 @@ def cnvlGauss2D(idxPrc, aryBoxCar, aryMdlParamsChnk, tplPngSize, varNumVol,
     varNumMtnDrtn = aryBoxCar.shape[2]
 
     # Output array with pRF model time courses:
-    aryOut = np.zeros([varChnkSze, varNumMtnDrtn, varNumVol])
+    aryOut = np.zeros([varChnkSze, varNumMtnDrtn, varNumVol],
+                      dtype=np.float32)
+
+    # Make sure datatype is float32:
+    # aryBoxCar = aryBoxCar.astype(np.float32)
+    # aryMdlParamsChnk = aryMdlParamsChnk.astype(np.float32)
 
     # Loop through different motion directions:
     for idxMtn in range(0, varNumMtnDrtn):
@@ -223,7 +237,7 @@ def cnvlGauss2D(idxPrc, aryBoxCar, aryMdlParamsChnk, tplPngSize, varNumVol,
                                   tplPngSize[1],
                                   varTmpX,
                                   varTmpY,
-                                  varTmpSd)
+                                  varTmpSd).astype(np.float32)
 
             # Multiply pixel-time courses with Gaussian pRF models:
             aryPrfTcTmp = np.multiply(aryBoxCar[:, :, idxMtn, :],
@@ -330,6 +344,10 @@ def crtPrfNrlTc(aryBoxCar, varNumMtDrctn, varNumVol, tplPngSize, varNumX,
     # the y-position, and (3) the standard deviation. The parameters are in
     # units of the upsampled visual space.
     aryMdlParams = np.zeros((varNumMdls, 4))
+
+    # Make sure datatype is float32:
+    aryBoxCar = aryBoxCar.astype(np.float32)
+    aryMdlParams = aryMdlParams.astype(np.float32)
 
     # Counter for parameter array:
     varCntMdlPrms = 0

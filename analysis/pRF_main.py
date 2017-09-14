@@ -85,6 +85,9 @@ if cfg.lgcCrteMdl:
     del(aryPngData)
     del(aryPresOrd)
 
+    # Make sure datatype is float32:
+    aryBoxCar = aryBoxCar.astype(np.float32)
+
     # *** Create neural time course models
     aryNrlTc = crtPrfNrlTc(aryBoxCar, cfg.varNumMtDrctn, cfg.varNumVol,
                            cfg.tplPngSize, cfg.varNumX, cfg.varExtXmin,
@@ -316,6 +319,7 @@ else:
             lstPrcs[idxPrc].Daemon = True
     else:
         print('---------pRF finding on GPU')
+
         # Create processes:
         for idxPrc in range(0, cfg.varPar):
             lstPrcs[idxPrc] = mp.Process(target=funcFindPrfGpu,
