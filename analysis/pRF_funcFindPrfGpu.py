@@ -318,11 +318,6 @@ def funcFindPrfGpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
 
     for idxChnk in range(varNumChnk):
 
-        print(('---------Chunk: ' + str(idxChnk)))
-
-        print('lstPrfTc[0].shape')
-        print(lstPrfTc[0].shape)
-
         # Define session:
         # objSess = tf.Session()
         with tf.Graph().as_default(), tf.Session() as objSess:

@@ -26,7 +26,7 @@ import time
 import multiprocessing as mp
 import sys
 from scipy import stats
-from pRF_utils import loadNiiData, saveNiiData, calcR2, calcFstats
+from pRF_utils import loadLargeNiiData, saveNiiData, calcR2, calcFstats
 from pRF_mdlCrt import (loadPng, loadPrsOrd, crtPwBoxCarFn, cnvlPwBoxCarFn,
                         crtPrfNrlTc)
 from pRF_filtering import funcSmthTmp
@@ -110,8 +110,14 @@ if cfg.lgcCrteMdl:
     # np.save(name, aryPrfTc)
     # aryPrfTc = np.load(name)
 
-    # *** Save pRF time course models
+    # *** Save pRF time course models as npy array:
     np.save(cfg.strPathMdl, aryPrfTc)
+
+    # Save pRF time course models as nii file (for debugging purposes), mean
+    # over motion directions:
+    strTmp = os.path.splitext(cfg.strPathMdl)[0] + '.nii'
+    niiPrfTc = nb.Nifti1Image(np.mean(aryPrfTc, axis=3), np.eye(4))
+    nb.save(niiPrfTc, strTmp)
 
 else:
     # %% Load existing pRF time course models
@@ -141,18 +147,19 @@ print('------Find pRF models for voxel time courses')
 niiMask = nb.load(cfg.strPathNiiMask)
 aryMask = niiMask.get_data().astype('bool')
 # Load data from functional runs
-aryFunc = loadNiiData(cfg.lstNiiFls, strPathNiiMask=cfg.strPathNiiMask,
-                      strPathNiiFunc=cfg.strPathNiiFunc)
+aryFunc = loadLargeNiiData(cfg.lstNiiFls, strPathNiiMask=cfg.strPathNiiMask,
+                           strPathNiiFunc=cfg.strPathNiiFunc)
 
-print('---------Consider only training pRF time courses and func data')
-# derive logical for training/test runs
-lgcTrnTst = np.ones(np.sum(cfg.vecRunLngth), dtype=bool)
-lgcTrnTst[np.cumsum(cfg.vecRunLngth)[cfg.varTestRun-1]:np.cumsum(
-          cfg.vecRunLngth)[cfg.varTestRun]] = False
-
-# split in training and test runs
-aryPrfTc = aryPrfTc[..., lgcTrnTst]
-aryFunc = aryFunc[..., lgcTrnTst]
+if cfg.varTestRun != None:
+    print('---------Consider only training pRF time courses and func data')
+    # derive logical for training/test runs
+    lgcTrnTst = np.ones(np.sum(cfg.vecRunLngth), dtype=bool)
+    lgcTrnTst[np.cumsum(cfg.vecRunLngth)[cfg.varTestRun-1]:np.cumsum(
+              cfg.vecRunLngth)[cfg.varTestRun]] = False
+    
+    # split in training and test runs
+    aryPrfTc = aryPrfTc[..., lgcTrnTst]
+    aryFunc = aryFunc[..., lgcTrnTst]
 
 print('---------Number of voxels on which pRF finding will be ' +
       'performed: ' + str(aryFunc.shape[0]))
@@ -319,6 +326,10 @@ else:
             lstPrcs[idxPrc].Daemon = True
     else:
         print('---------pRF finding on GPU')
+
+
+        np.save('/home/john/Desktop/aryPrfTc.npy', aryPrfTc)
+
 
         # Create processes:
         for idxPrc in range(0, cfg.varPar):

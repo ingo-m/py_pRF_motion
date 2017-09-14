@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import numpy as np
 import scipy as sp
 import pickle
@@ -45,11 +46,20 @@ def loadPng(varNumVol, tplPngSize, strPathPng):
     print('------Load PNGs')
     # Create list of png files to load:
     lstPngPaths = [None] * varNumVol
-    for idx01 in range(0, varNumVol):
-        lstPngPaths[idx01] = (strPathPng + str(idx01) + '.png')
-        # Alternative, if the PNGs are named in old-fashioned style
-        # ('BrainStim' style, i.e. 001, 002, etc.):
-        # lstPngPaths[idx01] = (strPathPng + str(idx01 + 1).zfill(3) + '.png')
+
+    # Do PNG file indices start at 0 or 1?
+    if os.path.isfile(strPathPng + str(0) + '.png'):
+        for idx01 in range(0, varNumVol):
+            lstPngPaths[idx01] = (strPathPng + str(idx01) + '.png')
+    else:
+        for idx01 in range(0, varNumVol):
+            # Alternative, if the PNGs are named in old-fashioned style
+            # ('BrainStim' style, i.e. 001, 002, etc.):
+            if idx01 == 0:
+                print('---------PNG input style: indexing from 1')
+            lstPngPaths[idx01] = (strPathPng
+                                  + str(idx01 + 1).zfill(3)
+                                  + '.png')
 
     # Load png files. The png data will be saved in a numpy array of the
     # following order: aryPngData[x-pixel, y-pixel, PngNumber]. The
@@ -414,9 +424,11 @@ def crtPrfNrlTc(aryBoxCar, varNumMtDrctn, varNumVol, tplPngSize, varNumX,
     print('---------Collecting results from parallel processes')
     # Put output arrays from parallel process into one big array
     lstPrfTc = sorted(lstPrfTc)
-    aryPrfTc = np.empty((0, varNumMtDrctn, varNumVol))
+    aryPrfTc = np.empty((0, varNumMtDrctn, varNumVol), dtype=np.float32)
     for idx in range(0, varPar):
-        aryPrfTc = np.concatenate((aryPrfTc, lstPrfTc[idx][1]), axis=0)
+        aryPrfTc = np.concatenate((aryPrfTc,
+                                   lstPrfTc[idx][1].astype(np.float32)),
+                                  axis=0)
 
     # check that all the models were collected correctly
     assert aryPrfTc.shape[0] == varNumMdls
@@ -430,7 +442,7 @@ def crtPrfNrlTc(aryBoxCar, varNumMtDrctn, varNumVol, tplPngSize, varNumX,
     # aryPrfTc[x-position, y-position, pRF-size, varNum Vol], which will hold
     # the pRF model time courses.
     aryNrlTc = np.zeros([varNumX, varNumY, varNumPrfSizes, varNumMtDrctn,
-                         varNumVol])
+                         varNumVol], dtype=np.float32)
 
     # We use the same loop structure for organising the pRF model time courses
     # that we used for creating the parameter array. Counter:
@@ -560,9 +572,10 @@ def cnvlPwBoxCarFn(aryNrlTc, varNumVol, varTr, tplPngSize, varNumMtDrctn,
     # Put output into correct order:
     lstConv = sorted(lstConv)
     # Concatenate convolved pixel time courses (into the same order
-    aryNrlTcConv = np.zeros((0, switchHrfSet, varNumVol))
+    aryNrlTcConv = np.zeros((0, switchHrfSet, varNumVol), dtype=np.float32)
     for idxRes in range(0, varPar):
-        aryNrlTcConv = np.concatenate((aryNrlTcConv, lstConv[idxRes][1]),
+        aryNrlTcConv = np.concatenate((aryNrlTcConv,
+                                       lstConv[idxRes][1].astype(np.float32)),
                                       axis=0)
     # clean up
     del(aryNrlTc)

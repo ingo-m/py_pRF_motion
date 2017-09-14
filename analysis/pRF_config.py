@@ -19,11 +19,11 @@
 
 
 # Number of x-positions to model:
-varNumX = 25
+varNumX = 10
 # Number of y-positions to model:
-varNumY = 25
+varNumY = 10
 # Number of pRF sizes to model:
-varNumPrfSizes = 30
+varNumPrfSizes = 10
 
 # Extend of visual space from centre of the screen (i.e. from the fixation
 # point) [degrees of visual angle]:
@@ -72,8 +72,9 @@ lstNiiFls = ['func_07_up_aniso_smth.nii',
              'func_09_up_aniso_smth.nii',
              'func_10_up_aniso_smth.nii',
              ]
-# which run should be hold out for testing? [python index strating from 0]
-varTestRun = 5
+# which run should be hold out for testing? [python index strating from 0,
+# or None if no testing run should be set aside]
+varTestRun = None
 
 # Path of mask (to restrict pRF model finding):
 strPathNiiMask = '/home/john/Documents/20161221/retinotopy/mask/tmp_gm_evc.nii.gz'

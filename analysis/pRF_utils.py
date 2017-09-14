@@ -26,6 +26,45 @@ from scipy import stats
 
 # %% Load voxel responses
 
+def loadLargeNii(strPathIn):
+    """
+    Load large nii file volume by volume, at float32 precision.
+
+    Parameters
+    ----------
+    strPathIn : str
+        Path to nifti file to load.
+
+    Returns
+    -------
+    aryNii : np.array
+        Array containing nii data. 32 bit floating point precision.
+    objHdr : header object
+        Header of nii file.
+    aryAff : np.array
+        Array containing 'affine', i.e. information about spatial positioning
+        of nii data.
+    """
+    # Load nii file (this does not load the data into memory yet):
+    objNii = nb.load(strPathIn)
+    # Get image dimensions:
+    tplSze = objNii.shape
+    # Create empty array for nii data:
+    aryNii = np.zeros(tplSze, dtype=np.float32)
+
+    # Loop through volumes:
+    for idxVol in range(tplSze[3]):
+        aryNii[..., idxVol] = np.asarray(
+              objNii.dataobj[..., idxVol]).astype(np.float32)
+
+    # Get headers:
+    objHdr = objNii.header
+    # Get 'affine':
+    aryAff = objNii.affine
+    # Output nii data as numpy array and header:
+    return aryNii, objHdr, aryAff
+
+
 def loadNiiData(lstNiiFls,
                 strPathNiiMask=None,
                 strPathNiiFunc=None):
@@ -54,6 +93,47 @@ def loadNiiData(lstNiiFls,
         print('------------Loading run: ' + str(idx+1))
         # Load 4D nii data:
         niiFunc = nb.load(path).get_data()
+        # append to list
+        if strPathNiiMask is not None:
+            aryFunc.append(niiFunc[aryMask, :])
+        else:
+            aryFunc.append(niiFunc)
+    # concatenate arrys in list along time dimension
+    aryFunc = np.concatenate(aryFunc, axis=-1)
+    # set to type float32
+    aryFunc = aryFunc.astype('float32')
+
+    return aryFunc
+
+
+def loadLargeNiiData(lstNiiFls,
+                     strPathNiiMask=None,
+                     strPathNiiFunc=None):
+    """load nii data.
+
+        Parameters
+        ----------
+        lstNiiFls : list, list of str with nii file names
+        strPathNiiMask : str, path to nii file with mask (optional)
+        strPathNiiFunc : str, parent path to nii files (optional)
+        Returns
+        -------
+        aryFunc : np.array
+            Nii data   
+    """
+    print('---------Loading nii data')
+    # check whether  a mask is available
+    if strPathNiiMask is not None:
+        aryMask = nb.load(strPathNiiMask).get_data().astype('bool')
+    # check a parent path is available that needs to be preprended to nii files
+    if strPathNiiFunc is not None:
+        lstNiiFls = [os.path.join(strPathNiiFunc, i) for i in lstNiiFls]
+
+    aryFunc = []
+    for idx, path in enumerate(lstNiiFls):
+        print('------------Loading run: ' + str(idx+1))
+        # Load 4D nii data:
+        niiFunc, _, _ = loadLargeNii(path)
         # append to list
         if strPathNiiMask is not None:
             aryFunc.append(niiFunc[aryMask, :])
