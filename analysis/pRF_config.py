@@ -19,11 +19,11 @@
 
 
 # Number of x-positions to model:
-varNumX = 10
+varNumX = 40
 # Number of y-positions to model:
-varNumY = 10
+varNumY = 40
 # Number of pRF sizes to model:
-varNumPrfSizes = 10
+varNumPrfSizes = 50
 
 # Extend of visual space from centre of the screen (i.e. from the fixation
 # point) [degrees of visual angle]:
@@ -77,7 +77,7 @@ lstNiiFls = ['func_07_up_aniso_smth.nii',
 varTestRun = None
 
 # Path of mask (to restrict pRF model finding):
-strPathNiiMask = '/home/john/Documents/20161221/retinotopy/mask/tmp_gm_evc.nii.gz'
+strPathNiiMask = '/media/john/DATADRIVE1/MRI_Data_PhD/05_PacMan/20161221/nii_distcor/mp2rage/04_seg/02_up/20161221_mp2rage_seg_v26.nii.gz'
 
 # Output basename:
 strPathOut = '/home/john/Documents/20161221/retinotopy/pRF_results_motion/pRF_results'
