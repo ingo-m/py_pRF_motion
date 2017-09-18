@@ -254,18 +254,20 @@ def funcFindPrfGpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
     # calculate the coefficient of determination (R-squared) for each voxel. We
     # start by calculating the total sum of squares (i.e. the deviation of the
     # data from the mean). The mean of each time course:
-    vecFuncMean = np.mean(aryFunc, axis=0)
+    vecFuncMean = np.mean(aryFunc, axis=0, dtype=np.float32)
     # Deviation from the mean for each datapoint:
-    vecFuncDev = np.subtract(aryFunc, vecFuncMean[None, :])
+    vecFuncDev = np.subtract(aryFunc, vecFuncMean[None, :], dtype=np.float32)
+
+    # We don't need the original array with the functional data anymore (the
+    # above seems to have created a hard copy):
+    del(aryFunc)
+
     # Sum of squares:
     vecSsTot = np.sum(np.power(vecFuncDev,
                                2.0),
                       axis=0)
 
-    # We don't need the original array with the functional data anymore (the
-    # above seems to have created a hard copy):
     del(vecFuncDev)
-    del(aryFunc)
 
     # -------------------------------------------------------------------------
     # *** Miscellaneous preparations
