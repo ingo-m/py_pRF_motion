@@ -29,10 +29,13 @@ Use `import pRF_config_motion as cfg` for pRF analysis with motion stimuli.
 
 import pRF_config_motion as cfg
 
+import time
 import numpy as np
 import nibabel as nb
-import time
 import multiprocessing as mp
+
+from model_creation_main import model_creation
+from preprocessing_main import pre_pro_func
 
 # *****************************************************************************
 
@@ -55,15 +58,27 @@ cfg.varSdSmthSpt = np.divide(cfg.varSdSmthSpt, cfg.varVoxRes)
 
 
 # *****************************************************************************
-# *** Create new pRF time course models, or load existing models
+# *** Create or load pRF time course models
 
-main_model_creation
-
+aryPrfTc = model_creation()
+# *****************************************************************************
 
 # *****************************************************************************
 # *** Preprocessing
 
-main_preprocessing
+aryMask, hdrMsk, aryAff, aryLgcVar, aryFunc = pre_pro_func(
+    cfg.strPathNiiMask, cfg.lstPathNiiFunc, lgcLinTrnd=cfg.lgcLinTrnd,
+    varSdSmthTmp=cfg.varSdSmthTmp, varSdSmthSpt=cfg.varSdSmthSpt,
+    varIntCtf=cfg.varIntCtf, varPar=cfg.varPar)
+
+
+    # Number of voxels for which pRF finding will be performed:
+    varNumVoxInc = aryFunc.shape[0]
+
+    print('---------Number of voxels on which pRF finding will be performed: '
+          + str(varNumVoxInc))
+
+pre_pro_models
 
 # *****************************************************************************
 
@@ -297,7 +312,7 @@ print('---------Exporting results')
 for idxOut in range(0, 6):
     # Create nii object for results:
     niiOut = nb.Nifti1Image(aryPrfRes[:, :, :, idxOut],
-                            affMsk,
+                            aryAff,
                             header=hdrMsk
                             )
     # Save nii:

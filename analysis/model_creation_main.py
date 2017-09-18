@@ -19,28 +19,26 @@
 
 import numpy as np
 import nibael as nb
-import pRF_config_motion as cfg
 from model_creation_load_png import load_png
 from model_creation_pixelwise import conv_dsgn_mat
 from model_creation_timecourses import crt_prf_tcmdl
 
+import pRF_config_motion as cfg
+
 
 def model_creation():
     """
-    Create pRF models.
+    Create or load pRF model time courses.
 
     Parameters
     ----------
-    idxPrc : int
+    Parameters for pRF model creation are imported from config.py file.
 
     Returns
     -------
-
-
-    Notes
-    -----
-
-
+    aryPrfTc : np.array
+        4D numpy array with pRF time course models, with following dimensions:
+        `aryPrfTc4D[x-position, y-position, SD, volume]`.
     """
     if cfg.lgcCrteMdl:  #noqa
 
@@ -57,7 +55,7 @@ def model_creation():
         # *********************************************************************
 
         # *********************************************************************
-        # *** Create pixel-wise HRF model time courses
+        # *** Convolve pixel-wise design matrix with HRF model
 
         print('------Convolve pixel-wise design matrix with HRF model')
 
@@ -93,6 +91,8 @@ def model_creation():
         # *********************************************************************
         # *** Save pRF time course models
 
+        print('------Save pRF time course models to disk')
+
         # Save the 4D array as '*.npy' file:
         np.save(cfg.strPathMdl,
                 aryPrfTc)
@@ -107,7 +107,7 @@ def model_creation():
         # *********************************************************************
         # *** Load existing pRF time course models
 
-        print('------Load pRF time course models')
+        print('------Save pRF time course models from disk')
 
         # Load the file:
         aryPrfTc = np.load(cfg.strPathMdl)
@@ -133,3 +133,5 @@ def model_creation():
                          'models do not agree with specified model parameters')
             raise ValueError(strErrMsg)
     # *************************************************************************
+
+    return aryPrfTc

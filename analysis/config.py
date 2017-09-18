@@ -59,13 +59,11 @@ varSdSmthTmp = 2.832
 # kernel, in mm]
 varSdSmthSpt = 0.0
 
+# Perform linear trend removal on fMRI data?
+lgcLinTrnd = True
+
 # Number of fMRI volumes and png files to load:
 varNumVol = 4 * 172
-
-# Intensity cutoff value of fMRI time series for preprocessing. Voxels with a
-# mean intensity lower than the value specified here are ignored (this speeds
-# up the computation, and, more importatnly, avoids division by zero):
-varIntCtf = 50.0
 
 # Number of processes to run in parallel:
 varPar = 11

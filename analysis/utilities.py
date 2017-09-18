@@ -160,5 +160,3 @@ def crt_hrf(varNumVol, varTr):
     vecHrf = np.divide(vecHrf, np.max(vecHrf))
 
     return vecHrf
-
-
