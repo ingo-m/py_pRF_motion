@@ -35,14 +35,18 @@ import nibabel as nb
 import multiprocessing as mp
 
 from model_creation_main import model_creation
+from preprocessing_main import pre_pro_models
 from preprocessing_main import pre_pro_func
-
+if cfg.strVersion == 'gpu':
+    from find_prf_gpu import find_prf_gpu
+if ((cfg.strVersion == 'cython') or (cfg.strVersion == 'numpy')):
+    from find_prf_cpu import find_prf_cpu
 # *****************************************************************************
 
 
 # *****************************************************************************
 # *** Check time
-print('---pRF analysis')
+print('-pRF analysis')
 varTme01 = time.time()
 # *****************************************************************************
 
@@ -66,20 +70,15 @@ aryPrfTc = model_creation()
 # *****************************************************************************
 # *** Preprocessing
 
-aryMask, hdrMsk, aryAff, aryLgcVar, aryFunc = pre_pro_func(
+# Preprocessing of pRF model time courses:
+aryPrfTc = pre_pro_models(aryPrfTc, varSdSmthTmp=cfg.varSdSmthTmp,
+                          varPar=cfg.varPar)
+
+# Preprocessing of functional data:
+aryLgcMsk, hdrMsk, aryAff, aryLgcVar, aryFunc, tplNiiShp = pre_pro_func(
     cfg.strPathNiiMask, cfg.lstPathNiiFunc, lgcLinTrnd=cfg.lgcLinTrnd,
     varSdSmthTmp=cfg.varSdSmthTmp, varSdSmthSpt=cfg.varSdSmthSpt,
     varIntCtf=cfg.varIntCtf, varPar=cfg.varPar)
-
-
-    # Number of voxels for which pRF finding will be performed:
-    varNumVoxInc = aryFunc.shape[0]
-
-    print('---------Number of voxels on which pRF finding will be performed: '
-          + str(varNumVoxInc))
-
-pre_pro_models
-
 # *****************************************************************************
 
 
@@ -87,6 +86,12 @@ pre_pro_models
 # *** Find pRF models for voxel time courses
 
 print('------Find pRF models for voxel time courses')
+
+# Number of voxels for which pRF finding will be performed:
+varNumVoxInc = aryFunc.shape[0]
+
+print('---------Number of voxels on which pRF finding will be performed: '
+      + str(varNumVoxInc))
 
 print('---------Preparing parallel pRF model finding')
 
@@ -157,11 +162,8 @@ if ((cfg.strVersion == 'numpy') or (cfg.strVersion == 'cython')):
 
     # Create processes:
     for idxPrc in range(0, cfg.varPar):
-        lstPrcs[idxPrc] = mp.Process(target=funcFindPrf,
+        lstPrcs[idxPrc] = mp.Process(target=find_prf_cpu,
                                      args=(idxPrc,
-                                           cfg.varNumX,
-                                           cfg.varNumY,
-                                           cfg.varNumPrfSizes,
                                            vecMdlXpos,
                                            vecMdlYpos,
                                            vecMdlSd,
@@ -180,11 +182,8 @@ elif cfg.strVersion == 'gpu':
 
     # Create processes:
     for idxPrc in range(0, cfg.varPar):
-        lstPrcs[idxPrc] = mp.Process(target=funcFindPrfGpu,
+        lstPrcs[idxPrc] = mp.Process(target=find_prf_gpu,
                                      args=(idxPrc,
-                                           cfg.varNumX,
-                                           cfg.varNumY,
-                                           cfg.varNumPrfSizes,
                                            vecMdlXpos,
                                            vecMdlYpos,
                                            vecMdlSd,
@@ -271,6 +270,9 @@ aryPrfRes01[aryLgcVar, 1] = aryBstYpos
 aryPrfRes01[aryLgcVar, 2] = aryBstSd
 aryPrfRes01[aryLgcVar, 3] = aryBstR2
 
+# Total number of voxels:
+varNumVoxTlt = (tplNiiShp[0] * tplNiiShp[1] * tplNiiShp[2])
+
 # Place voxels based on mask-exclusion:
 aryPrfRes02 = np.zeros((varNumVoxTlt, 6), dtype=np.float32)
 aryPrfRes02[aryLgcMsk, 0] = aryPrfRes01[:, 0]
@@ -280,9 +282,9 @@ aryPrfRes02[aryLgcMsk, 3] = aryPrfRes01[:, 3]
 
 # Reshape pRF finding results into original image dimensions:
 aryPrfRes = np.reshape(aryPrfRes02,
-                       [vecNiiShp[0],
-                        vecNiiShp[1],
-                        vecNiiShp[2],
+                       [tplNiiShp[0],
+                        tplNiiShp[1],
+                        tplNiiShp[2],
                         6])
 
 del(aryPrfRes01)

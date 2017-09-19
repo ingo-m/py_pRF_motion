@@ -38,7 +38,7 @@ def model_creation():
     -------
     aryPrfTc : np.array
         4D numpy array with pRF time course models, with following dimensions:
-        `aryPrfTc4D[x-position, y-position, SD, volume]`.
+        `aryPrfTc[x-position, y-position, SD, volume]`.
     """
     if cfg.lgcCrteMdl:  #noqa
 

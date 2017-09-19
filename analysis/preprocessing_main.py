@@ -26,7 +26,7 @@ from preprocessing_par import pre_pro_par
 def pre_pro_func(strPathNiiMask, lstPathNiiFunc, lgcLinTrnd=True,
                  varSdSmthTmp=2.0, varSdSmthSpt=0.0, varPar=10.0):
     """
-    Load & preprocess nii data.
+    Load & preprocess functional data.
 
     Parameters
     ----------
@@ -49,9 +49,9 @@ def pre_pro_func(strPathNiiMask, lstPathNiiFunc, lgcLinTrnd=True,
 
     Returns
     -------
-    aryMask : np.array
-        3D numpy array. Externally supplied mask (e.g grey matter mask). Voxels
-        that are `zero` in the mask are excluded
+    aryLgcMsk : np.array
+        3D numpy array with logial values. Externally supplied mask (e.g grey
+        matter mask). Voxels that are `False` in the mask are excluded.
     hdrMsk : nibabel-header-object
         Nii header of mask.
     aryAff : np.array
@@ -69,6 +69,11 @@ def pre_pro_func(strPathNiiMask, lstPathNiiFunc, lgcLinTrnd=True,
     aryFunc : np.array
         2D numpy array containing preprocessed functional data, of the form
         aryFunc[voxelCount, time].
+    tplNiiShp : tuple
+        Spatial dimensions of input nii data (number of voxels in x, y, z
+        direction). The data are reshaped during preprocessing, this
+        information is needed to fit final output into original spatial
+        dimensions.
 
     Notes
     -----
@@ -90,10 +95,10 @@ def pre_pro_func(strPathNiiMask, lstPathNiiFunc, lgcLinTrnd=True,
     # varNumVoxMsk = int(np.count_nonzero(aryMask))
 
     # Dimensions of nii data:
-    vecNiiShp = aryMask.shape
+    tplNiiShp = aryMask.shape
 
     # Total number of voxels:
-    varNumVoxTlt = (vecNiiShp[0] * vecNiiShp[1] * vecNiiShp[2])
+    varNumVoxTlt = (tplNiiShp[0] * tplNiiShp[1] * tplNiiShp[2])
 
     # Reshape mask:
     aryMask = np.reshape(aryMask, varNumVoxTlt)
@@ -107,14 +112,14 @@ def pre_pro_func(strPathNiiMask, lstPathNiiFunc, lgcLinTrnd=True,
     # Loop through runs and load data:
     for idxRun in range(varNumRun):
 
-        print(('------Preprocess run ' + str(idxRun + 1)))
+        print(('---------Preprocess run ' + str(idxRun + 1)))
 
         # Load 4D nii data:
         aryTmpFunc, _, _ = load_nii_large(lstPathNiiFunc[idxRun])
 
         # Dimensions of nii data (including temporal dimension; spatial
         # dimensions need to be the same for mask & functional data):
-        vecNiiShp = aryTmpFunc.shape
+        tplNiiShp = aryTmpFunc.shape
 
         # Preprocessing of nii data:
         aryTmpFunc = pre_pro_par(aryTmpFunc,
@@ -126,7 +131,7 @@ def pre_pro_func(strPathNiiMask, lstPathNiiFunc, lgcLinTrnd=True,
 
         # Reshape functional nii data, from now on of the form
         # aryTmpFunc[voxelCount, time]:
-        aryTmpFunc = np.reshape(aryTmpFunc, [varNumVoxTlt, vecNiiShp[3]])
+        aryTmpFunc = np.reshape(aryTmpFunc, [varNumVoxTlt, tplNiiShp[3]])
 
         # Apply mask:
         aryLgcMsk = np.greater(aryMask.astype(np.int16),
@@ -181,12 +186,36 @@ def pre_pro_func(strPathNiiMask, lstPathNiiFunc, lgcLinTrnd=True,
     # cutoff value) are fullfilled:
     aryFunc = aryFunc[aryLgcVar, :]
 
-    return aryMask, hdrMsk, aryAff, aryLgcVar, aryFunc
+    return aryLgcMsk, hdrMsk, aryAff, aryLgcVar, aryFunc, tplNiiShp
 
 
-def pre_pro_models():
-    """."""
-    print('---------Preprocess pRF time course models')
+def pre_pro_models(aryPrfTc, varSdSmthTmp=2.0, varPar=10):
+    """
+    Preprocess pRF model time courses.
+
+    Parameters
+    ----------
+    aryPrfTc : np.array
+        4D numpy array with pRF time course models, with following dimensions:
+        `aryPrfTc[x-position, y-position, SD, volume]`.
+    varSdSmthTmp : float
+        Extent of temporal smoothing that is applied to functional data and
+        pRF time course models, [SD of Gaussian kernel, in seconds]. If `zero`,
+        no temporal smoothing is applied.
+    varPar : int
+        Number of processes to run in parallel (multiprocessing).
+
+    Returns
+    -------
+    aryPrfTc : np.array
+        4D numpy array with preprocessed pRF time course models, same
+        dimensions as input (`aryPrfTc[x-position, y-position, SD, volume]`).
+
+    Notes
+    -----
+    Only temporal smoothing is applied to the pRF model time courses.
+    """
+    print('------Preprocess pRF time course models')
     # Preprocessing of pRF time course models:
     aryPrfTc = pre_pro_par(aryPrfTc,
                            aryMask=np.array([]),
