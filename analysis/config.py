@@ -17,11 +17,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Number of x-positions to model:
-varNumX = 40
+varNumX = 10
 # Number of y-positions to model:
-varNumY = 40
+varNumY = 10
 # Number of pRF sizes to model:
-varNumPrfSizes = 50
+varNumPrfSizes = 15
 
 # Extent of visual space from centre of the screen in negative x-direction
 # (i.e. from the fixation point to the left end of the screen) in degrees of
@@ -74,65 +74,60 @@ varPar = 11
 # specified above. In other words, if the the resolution in x-direction of the
 # visual space model is ten times that of varNumX, the resolution in
 # y-direction also has to be ten times varNumY. The order is: first x, then y.
-tplVslSpcSze = (300, 300)
+tplVslSpcSze = (100, 100)
 
 # Path of functional data (needs to have same number of volumes as there are
 # PNGs):
-lstPathNiiFunc = ['/home/john/Desktop/tmp/func_regAcrssRuns_cube_up/func_07_up_aniso_smth.nii',
-                  '/home/john/Desktop/tmp/func_regAcrssRuns_cube_up/func_08_up_aniso_smth.nii',
-                  '/home/john/Desktop/tmp/func_regAcrssRuns_cube_up/func_09_up_aniso_smth.nii',
-                  '/home/john/Desktop/tmp/func_regAcrssRuns_cube_up/func_10_up_aniso_smth.nii']  #noqa
+lstPathNiiFunc = ['/home/john/Documents/20161221/func_regAcrssRuns_cube/func_07.nii',
+                  '/home/john/Documents/20161221/func_regAcrssRuns_cube/func_08.nii',
+                  '/home/john/Documents/20161221/func_regAcrssRuns_cube/func_09.nii',
+                  '/home/john/Documents/20161221/func_regAcrssRuns_cube/func_10.nii']  #noqa
 
 # Path of mask (to restrict pRF model finding):
-strPathNiiMask = '/media/sf_D_DRIVE/MRI_Data_PhD/05_PacMan/20161221/nii_distcor/mp2rage/04_seg/02_up/20161221_mp2rage_seg_v26.nii.gz'  #noqa
+strPathNiiMask = '/home/john/Documents/20161221/retinotopy/mask/20161221_mp2rage_seg_v26_gm_down_bin_gmcube.nii.gz'  #noqa
 
 # Output basename:
-strPathOut = '/media/sf_D_DRIVE/MRI_Data_PhD/05_PacMan/20161221/nii_distcor/retinotopy/pRF_results_up/aniso_gamma_0p02_n_3/pRF_results'  #noqa
-
-# List with paths of pickles with information about experimental design (order
-# of stimuli). Only needed for pRF_motionLog.py (in order to create PNGs for
-# static component of motion pRF mapping).
-lstDsgn = ['~/ModBasedMotLoc/Conditions/Conditions_run01.pickle',
-           '~/ModBasedMotLoc/Conditions/Conditions_run02.pickle',
-           '~/ModBasedMotLoc/Conditions/Conditions_run03.pickle',
-           '~/ModBasedMotLoc/Conditions/Conditions_run04.pickle']
-
-# Path to npz file containing numpy array that defines stimulus shape, created
-# with ~/py_pRF_motion/stimuli/Code/CreateMasks.py. Only needed for
-# pRF_motionLog.py (in order to create PNGs for static component of motion pRF
-# mapping).
-strShpe = '~/mskBar.npz'
+strPathOut = '/home/john/Documents/20161221/retinotopy/pRF_results_motion/pRF_results'  #noqa
 
 # Which version to use for pRF finding. 'numpy' or 'cython' for pRF finding on
 # CPU, 'gpu' for using GPU.
-strVersion = 'cython'
+strVersion = 'gpu'
 
 # Create pRF time course models?
-lgcCrteMdl = False
+lgcCrteMdl = True
 
-if lgcCrteMdl:
-    # If we create new pRF time course models, the following parameters have to
-    # be provided:
+# If we create new pRF time course models, the following parameters have to
+# be provided:
 
-    # Basename of the 'binary stimulus files'. The files need to be in png
-    # format and number in the order of their presentation during the
-    # experiment.
-    strPathPng = '/media/sf_D_DRIVE/MRI_Data_PhD/05_PacMan/20161221/nii_distcor/retinotopy/pRF_stimuli/frame_'  #noqa
+# Basename of the 'binary stimulus files'. The files need to be in png
+# format and number in the order of their presentation during the
+# experiment.
+strPathPng = '/home/john/Documents/20161221/retinotopy/pRF_stimuli/frame_'  #noqa
 
-    # Start index of PNG files. For instance, `varStrtIdx = 0` if the name of
-    # the first PNG file is `file_000.png`, or `varStrtIdx = 1` if it is
-    # `file_001.png`.
-    varStrtIdx = 1
+# Start index of PNG files. For instance, `varStrtIdx = 0` if the name of
+# the first PNG file is `file_000.png`, or `varStrtIdx = 1` if it is
+# `file_001.png`.
+varStrtIdx = 1
 
-    # Zero padding of PNG file names. For instance, `varStrtIdx = 3` if the
-    # name of PNG files is `file_007.png`, or `varStrtIdx = 4` if it is
-    # `file_0007.png`.
-    varZfill = 3
+# Zero padding of PNG file names. For instance, `varStrtIdx = 3` if the
+# name of PNG files is `file_007.png`, or `varStrtIdx = 4` if it is
+# `file_0007.png`.
+varZfill = 3
 
-    # Output path for pRF time course models file (without file extension):
-    strPathMdl = '/media/sf_D_DRIVE/MRI_Data_PhD/05_PacMan/20161221/nii_distcor/retinotopy/pRF_results_up/pRF_model_tc'  #noqa
+# Path to npy file with pRF time course models (to save or laod). Without file
+# extension.
+strPathMdl = '/home/john/Documents/20161221/retinotopy/design_matrix/pRF_timecourses'  #noqa
 
-else:
-    # If we use existing pRF time course models, the path to the respective
-    # file has to be provided (including file extension, i.e. '*.npy'):
-    strPathMdl = '/media/sf_D_DRIVE/MRI_Data_PhD/05_PacMan/20161221/nii_distcor/retinotopy/pRF_results_up/pRF_model_tc.npy'  #noqa
+# List with paths of pickles with information about experimental design (order
+# of stimuli). Only needed for motion_log.py (in order to create PNGs for
+# static component of motion pRF mapping).
+lstDsgn = ['/home/john/Documents/20161221/retinotopy/design_matrix/Conditions_run01.pickle',
+           '/home/john/Documents/20161221/retinotopy/design_matrix/Conditions_run02.pickle',
+           '/home/john/Documents/20161221/retinotopy/design_matrix/Conditions_run03.pickle',
+           '/home/john/Documents/20161221/retinotopy/design_matrix/Conditions_run04.pickle']
+
+# Path to npz file containing numpy array that defines stimulus shape, created
+# with ~/py_pRF_motion/stimuli/Code/CreateMasks.py. Only needed for
+# motion_log.py (in order to create PNGs for static component of motion pRF
+# mapping).
+strShpe = '~/mskBar.npz'

@@ -18,12 +18,13 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-import nibael as nb
+import nibabel as nb
+import pickle
 from model_creation_load_png import load_png
 from model_creation_pixelwise import conv_dsgn_mat
 from model_creation_timecourses import crt_prf_tcmdl
 
-import pRF_config_motion as cfg
+import config as cfg
 
 
 def model_creation():
@@ -51,7 +52,32 @@ def model_creation():
                               cfg.strPathPng,
                               cfg.tplVslSpcSze,
                               varStrtIdx=cfg.varStrtIdx,
-                              varZfill=3)
+                              varZfill=cfg.varZfill)
+        # *********************************************************************
+
+
+        # *********************************************************************
+        # *** Account for motion directions
+
+        # List for arrays with motion directions
+        lstMtn = []
+
+        # Loop through pickle files with information on motion direction:
+        for strTmp in cfg.lstDsgn:
+            with open(strTmp, 'r') as objPckl:
+                # The second column of the respective array holds information
+                # on motion directions:
+                lstMtn.append(pickle.load(objPckl)['Conditions'][:, 1])
+
+        # Concatenate motion direction arrays from all runs:
+        aryMtn = np.hstack(lstMtn)
+
+
+
+        # TODO: Create hdf5 pRF model time courses.
+
+
+
         # *********************************************************************
 
         # *********************************************************************
@@ -107,10 +133,10 @@ def model_creation():
         # *********************************************************************
         # *** Load existing pRF time course models
 
-        print('------Save pRF time course models from disk')
+        print('------Load pRF time course models from disk')
 
         # Load the file:
-        aryPrfTc = np.load(cfg.strPathMdl)
+        aryPrfTc = np.load((cfg.strPathMdl + '.npy'))
 
         # Check whether pRF time course model matrix has the expected
         # dimensions:
