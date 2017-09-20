@@ -26,7 +26,7 @@ from scipy.ndimage.filters import gaussian_filter1d
 
 def pre_pro_par(aryFunc, aryMask=np.array([], dtype=np.int16),  #noqa
                 lgcLinTrnd=False, varSdSmthTmp=0.0, varSdSmthSpt=0.0,
-                varPar=1):
+                varPar=1, lgcStts=True):
     """
     Preprocess fMRI data or pRF time course models for a pRF analysis.
 
@@ -48,6 +48,8 @@ def pre_pro_par(aryFunc, aryMask=np.array([], dtype=np.int16),  #noqa
         voxels). No spatial smoothing is applied if varSdSmthSpt = 0.0.
     varPar : int
         Number of processes to run in parallel.
+    lgcStts : logical
+        Whether to print status messages.
 
     Returns
     -------
@@ -119,8 +121,9 @@ def pre_pro_par(aryFunc, aryMask=np.array([], dtype=np.int16),  #noqa
         # Number of elements on which function will be applied:
         varNumEleInc = aryData.shape[0]
 
-        print('------------Number of voxels/pRF time courses on which ' +
-              'function will be applied: ' + str(varNumEleInc))
+        if lgcStts:
+            print('------------Number of voxels/pRF time courses on which '
+                  + 'function will be applied: ' + str(varNumEleInc))
 
         # List into which the chunks of data for the parallel processes will be
         # put:
@@ -146,7 +149,8 @@ def pre_pro_par(aryFunc, aryMask=np.array([], dtype=np.int16),  #noqa
         # We don't need the original array with the functional data anymore:
         del(aryData)
 
-        print('------------Creating parallel processes')
+        if lgcStts:
+            print('------------Creating parallel processes')
 
         # Create processes:
         for idxPrc in range(0, varPar):
@@ -170,7 +174,8 @@ def pre_pro_par(aryFunc, aryMask=np.array([], dtype=np.int16),  #noqa
         for idxPrc in range(0, varPar):
             lstPrcs[idxPrc].join()
 
-        print('------------Post-process data from parallel function')
+        if lgcStts:
+            print('------------Post-process data from parallel function')
 
         # Create list for vectors with results, in order to put the results
         # into the correct order:
@@ -273,7 +278,8 @@ def pre_pro_par(aryFunc, aryMask=np.array([], dtype=np.int16),  #noqa
         # We don't need the original array with the functional data anymore:
         del(aryData)
 
-        print('------------Creating parallel processes')
+        if lgcStts:
+            print('------------Creating parallel processes')
 
         # Create processes:
         for idxPrc in range(0, varPar):
@@ -297,7 +303,8 @@ def pre_pro_par(aryFunc, aryMask=np.array([], dtype=np.int16),  #noqa
         for idxPrc in range(0, varPar):
             lstPrcs[idxPrc].join()
 
-        print('------------Post-process data from parallel function')
+        if lgcStts:
+            print('------------Post-process data from parallel function')
 
         # Create list for vectors with results, in order to put the results
         # into the correct order:
@@ -472,7 +479,8 @@ def pre_pro_par(aryFunc, aryMask=np.array([], dtype=np.int16),  #noqa
 
     if lgcLinTrnd:
         # Perform linear trend removal (parallelised over voxels):
-        print('---------Linear trend removal')
+        if lgcStts:
+            print('---------Linear trend removal')
         aryFunc = funcParVox(funcLnTrRm,
                              aryFunc,
                              aryMask,
@@ -482,7 +490,8 @@ def pre_pro_par(aryFunc, aryMask=np.array([], dtype=np.int16),  #noqa
     # Perform spatial smoothing on fMRI data (reduced parallelisation over
     # volumes because this function is very memory intense):
     if 0.0 < varSdSmthSpt:
-        print('---------Spatial smoothing')
+        if lgcStts:
+            print('---------Spatial smoothing')
 
         # (A) Reduced parallelisation:
 
@@ -517,7 +526,8 @@ def pre_pro_par(aryFunc, aryMask=np.array([], dtype=np.int16),  #noqa
 
     # Perform temporal smoothing:
     if 0.0 < varSdSmthTmp:
-        print('---------Temporal smoothing')
+        if lgcStts:
+            print('---------Temporal smoothing')
         aryFunc = funcParVox(funcSmthTmp,
                              aryFunc,
                              aryMask,
@@ -528,10 +538,11 @@ def pre_pro_par(aryFunc, aryMask=np.array([], dtype=np.int16),  #noqa
     # *************************************************************************
     # *** Report time
 
-    varTme02 = time.time()
-    varTme03 = varTme02 - varTme01
-    print('------Elapsed time: ' + str(varTme03) + ' s')
-    print('------Done.')
+    if lgcStts:
+        varTme02 = time.time()
+        varTme03 = varTme02 - varTme01
+        print('------Elapsed time: ' + str(varTme03) + ' s')
+        print('------Done.')
     # *************************************************************************
 
     # *************************************************************************

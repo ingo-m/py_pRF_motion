@@ -74,7 +74,7 @@ varPar = 11
 # specified above. In other words, if the the resolution in x-direction of the
 # visual space model is ten times that of varNumX, the resolution in
 # y-direction also has to be ten times varNumY. The order is: first x, then y.
-tplVslSpcSze = (100, 100)
+tplVslSpcSze = (60, 60)
 
 # Path of functional data (needs to have same number of volumes as there are
 # PNGs):
@@ -91,7 +91,7 @@ strPathOut = '/home/john/Documents/20161221/retinotopy/pRF_results_motion/pRF_re
 
 # Which version to use for pRF finding. 'numpy' or 'cython' for pRF finding on
 # CPU, 'gpu' for using GPU.
-strVersion = 'gpu'
+strVersion = 'numpy'  # 'gpu'
 
 # Create pRF time course models?
 lgcCrteMdl = True

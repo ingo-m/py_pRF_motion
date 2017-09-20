@@ -38,7 +38,7 @@ from model_creation_main import model_creation
 from preprocessing_main import pre_pro_models
 from preprocessing_main import pre_pro_func
 if cfg.strVersion == 'gpu':
-    from find_prf_gpu import find_prf_gpu
+    from find_prf_gpu_motion import find_prf_gpu
 if ((cfg.strVersion == 'cython') or (cfg.strVersion == 'numpy')):
     from find_prf_cpu import find_prf_cpu
 # *****************************************************************************
@@ -88,11 +88,6 @@ aryLgcMsk, hdrMsk, aryAff, aryLgcVar, aryFunc, tplNiiShp = pre_pro_func(
     varSdSmthTmp=cfg.varSdSmthTmp, varSdSmthSpt=cfg.varSdSmthSpt,
     varPar=cfg.varPar)
 # *****************************************************************************
-
-
-
-
-
 
 
 # *****************************************************************************

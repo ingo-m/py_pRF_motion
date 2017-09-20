@@ -64,10 +64,10 @@ def prf_par(aryMdlParamsChnk, tplVslSpcSze, varNumVol, aryPixConv, queOut):
     varChnkSze = np.size(aryMdlParamsChnk, axis=0)
 
     # Number of features (e.g. motion directions):
-    varNumFtr = aryPixConv.shape[0]
+    # varNumFtr = aryPixConv.shape[0]
 
     # Output array with pRF model time courses:
-    aryOut = np.zeros([varNumFtr, varChnkSze, varNumVol], dtype=np.float32)
+    aryOut = np.zeros([varChnkSze, varNumVol], dtype=np.float32)
 
     # Loop through combinations of model parameters:
     for idxMdl in range(varChnkSze):
@@ -107,7 +107,7 @@ def prf_par(aryMdlParamsChnk, tplVslSpcSze, varNumVol, aryPixConv, queOut):
         #                         np.sum(aryGauss, axis=(0, 1)))
 
         # Put model time courses into the function's output array:
-        aryOut[varTmpFtr, idxMdl, :] = aryPrfTcTmp
+        aryOut[idxMdl, :] = aryPrfTcTmp
 
     # Put column with the indicies of model-parameter-combinations into the
     # output array (in order to be able to put the pRF model time courses into

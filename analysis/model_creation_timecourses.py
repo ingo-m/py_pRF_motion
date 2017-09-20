@@ -22,7 +22,7 @@ import multiprocessing as mp
 from model_creation_timecourses_par import prf_par
 
 
-def crt_prf_tcmdl(aryPixConv, strDirHdf, tplVslSpcSze=(200, 200), varNumX=40,
+def crt_prf_tcmdl(aryPixConv, strDirHdf, tplVslSpcSze=(200, 200), varNumX=40,  #noqa
                   varNumY=40, varExtXmin=-5.19, varExtXmax=5.19,
                   varExtYmin=-5.19, varExtYmax=5.19, varPrfStdMin=0.1,
                   varPrfStdMax=7.0, varNumPrfSizes=40, varPar=10):
@@ -164,20 +164,20 @@ def crt_prf_tcmdl(aryPixConv, strDirHdf, tplVslSpcSze=(200, 200), varNumX=40,
 
         # Loop through x-positions:
         for idxX in range(varNumX):
-    
+
             # Loop through y-positions:
             for idxY in range(varNumY):
-    
+
                 # Loop through standard deviations (of Gaussian pRF models):
                 for idxSd in range(varNumPrfSizes):
-    
+
                     # Place index and parameters in array:
                     aryMdlParams[varCntMdlPrms, 0] = varCntMdlPrms
                     aryMdlParams[varCntMdlPrms, 1] = idxFtr
                     aryMdlParams[varCntMdlPrms, 2] = vecX[idxX]
                     aryMdlParams[varCntMdlPrms, 3] = vecY[idxY]
                     aryMdlParams[varCntMdlPrms, 4] = vecPrfSd[idxSd]
-    
+
                     # Increment parameter index:
                     varCntMdlPrms = varCntMdlPrms + 1
 
@@ -280,19 +280,19 @@ def crt_prf_tcmdl(aryPixConv, strDirHdf, tplVslSpcSze=(200, 200), varNumX=40,
 
         # Loop through x-positions:
         for idxX in range(varNumX):
-    
+
             # Loop through y-positions:
             for idxY in range(varNumY):
-    
+
                 # Loop through standard deviations (of Gaussian pRF models):
                 for idxSd in range(varNumPrfSizes):
-    
-                    # Put the pRF model time course into its correct position in
-                    # the 4D array, leaving out the first column (which contains
-                    # the index):
+
+                    # Put the pRF model time course into its correct position
+                    # in the 4D array, leaving out the first column (which
+                    # contains the index):
                     aryPrfTc4D[idxFtr, idxX, idxY, idxSd, :] = \
                         aryPrfTc[varCntMdlPrms, 1:].astype(np.float32)
-    
+
                     # Increment parameter index:
                     varCntMdlPrms = varCntMdlPrms + 1
 

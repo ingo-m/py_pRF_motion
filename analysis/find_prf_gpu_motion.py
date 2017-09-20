@@ -23,8 +23,8 @@ import threading
 import tensorflow as tf
 
 
-def funcFindPrfGpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
-                   aryPrfTc, varL2reg, queOut):
+def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
+                 aryPrfTc, varL2reg, queOut):
     """
     Find best pRF model for voxel time course.
 

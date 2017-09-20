@@ -214,13 +214,14 @@ def pre_pro_models(aryPrfTc, varSdSmthTmp=2.0, varPar=10):
     -----
     Only temporal smoothing is applied to the pRF model time courses.
     """
-    print('------Preprocess pRF time course models')
+    # print('------Preprocess pRF time course models')
     # Preprocessing of pRF time course models:
     aryPrfTc = pre_pro_par(aryPrfTc,
                            aryMask=np.array([]),
                            lgcLinTrnd=False,
                            varSdSmthTmp=varSdSmthTmp,
                            varSdSmthSpt=0.0,
-                           varPar=varPar)
+                           varPar=varPar,
+                           lgcStts=False)
 
     return aryPrfTc
