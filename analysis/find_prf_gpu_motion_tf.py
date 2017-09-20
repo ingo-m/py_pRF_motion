@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Main function for pRF finding."""
+"""Child function for pRF finding on GPU."""
 
 # Part of py_pRF_mapping library
 # Copyright (C) 2016  Ingo Marquardt
@@ -23,8 +23,8 @@ import threading
 import tensorflow as tf
 
 
-def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
-                 aryPrfTc, varL2reg, queOut):
+def find_prf_gpu_tf(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
+                    aryPrfTc, varL2reg, queOut):
     """
     Find best pRF model for voxel time course.
 
@@ -80,9 +80,9 @@ def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
     the computational graph.
     """
     # -------------------------------------------------------------------------
-    # *** Queue-feeding-function that will run in extra thread
-    def funcPlcIn():
-        """Place data on queue."""
+    # *** Queue-feeding-functions that will run in extra thread
+    def fncPlcDsgn():
+        """Place design matrix on queue."""
         # Iteration counter:
         idxCnt = 0
 
@@ -104,6 +104,31 @@ def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
             # Stop if all data has been put on the queue:
             elif idxCnt == varNumMdls:
                 break
+
+    def fncPlcFunc():
+
+
+        # List into which the chunks of functional data for the parallel processes
+        # will be put:
+        lstFunc = [None] * cfg.varPar
+
+        # Vector with the indicies at which the functional data will be separated
+        # in order to be chunked up for the parallel processes:
+        vecIdxChnks = np.linspace(0,
+                                  varNumVoxInc,
+                                  num=cfg.varPar,
+                                  endpoint=False)
+        vecIdxChnks = np.hstack((vecIdxChnks, varNumVoxInc))
+
+        # Put functional data into chunks:
+        for idxChnk in range(0, cfg.varPar):
+            # Index of first voxel to be included in current chunk:
+            varTmpChnkSrt = int(vecIdxChnks[idxChnk])
+            # Index of last voxel to be included in current chunk:
+            varTmpChnkEnd = int(vecIdxChnks[(idxChnk+1)])
+            # Put voxel array into list:
+            lstFunc[idxChnk] = aryFunc[varTmpChnkSrt:varTmpChnkEnd, :]
+
 
     # -------------------------------------------------------------------------
     # *** Prepare pRF model time courses for graph
@@ -373,7 +398,7 @@ def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
             varBuff = 10
 
             # Define & run extra thread with graph that places data on queue:
-            objThrd = threading.Thread(target=funcPlcIn)
+            objThrd = threading.Thread(target=fncPlcDsgn)
             objThrd.setDaemon(True)
             objThrd.start()
 
