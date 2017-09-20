@@ -48,8 +48,9 @@ def load_png(varNumVol, strPathPng, tplVslSpcSze=(200, 200), varStrtIdx=0,
     Returns
     -------
     aryPngData : np.array
-        3D Numpy array with the following structure:
-        aryPngData[x-pixel-index, y-pixel-index, PngNumber]
+        3D Numpy array containing pixel-wise design matrix, at np.int8
+        precision, with the following structure:
+        aryPngData[x-position, y-position, time]
 
     Notes
     -----

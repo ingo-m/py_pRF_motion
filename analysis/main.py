@@ -71,9 +71,16 @@ aryPrfTc = model_creation()
 # *****************************************************************************
 # *** Preprocessing
 
-# Preprocessing of pRF model time courses:
-aryPrfTc = pre_pro_models(aryPrfTc, varSdSmthTmp=cfg.varSdSmthTmp,
-                          varPar=cfg.varPar)
+# Preprocessing of pRF model time courses
+
+# Number of features (e.g. motion directions):
+varNumFtr = aryPrfTc.shape[0]
+
+# Loop through features:
+for idxFtr in range(varNumFtr):
+    aryPrfTc[idxFtr, :] = pre_pro_models(aryPrfTc[idxFtr, :],
+                                         varSdSmthTmp=cfg.varSdSmthTmp,
+                                         varPar=cfg.varPar)
 
 # Preprocessing of functional data:
 aryLgcMsk, hdrMsk, aryAff, aryLgcVar, aryFunc, tplNiiShp = pre_pro_func(
@@ -81,6 +88,11 @@ aryLgcMsk, hdrMsk, aryAff, aryLgcVar, aryFunc, tplNiiShp = pre_pro_func(
     varSdSmthTmp=cfg.varSdSmthTmp, varSdSmthSpt=cfg.varSdSmthSpt,
     varPar=cfg.varPar)
 # *****************************************************************************
+
+
+
+
+
 
 
 # *****************************************************************************

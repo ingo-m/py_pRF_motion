@@ -30,18 +30,18 @@ def prf_par(aryMdlParamsChnk, tplVslSpcSze, varNumVol, aryPixConv, queOut):
     aryMdlParamsChnk : np.array
         2D numpy array containing the parameters for the pRF models to be
         created. Dimensionality: `aryMdlParamsChnk[model-ID, parameter-value]`.
-        For each model there are four values: (0) an index starting from zero,
-        (1) the x-position, (2) the y-position, and (3) the standard deviation.
-        Parameters 1, 2 , and 3 are in units of the upsampled visual space.
+        For each model there are five values: (0) an index starting from zero,
+        (1) an additional stimulus feature (e.g. motion direction), (2) the
+        x-position, (3) the y-position, and (4) the standard deviation.
+        Parameters 2, 3, and 4 are in units of visual space.
     tplVslSpcSze : tuple
         Pixel size of visual space model in which the pRF models are created
         (x- and y-dimension).
     varNumVol : int
         Number of time points (volumes).
     aryPixConv : np.array
-        3D numpy array containing the pixel-wise, HRF-convolved design matrix,
-        with the following structure: `aryPixConv[x-pixel-index, y-pixel-index,
-        PngNumber]`
+        4D numpy array containing HRF-convolved pixel-wise design matrix, with
+        shape `aryPixConv[feature, x-position, y-position, time]`.
     queOut : multiprocessing.queues.Queue
         Queue to put the results on.
 
@@ -63,33 +63,40 @@ def prf_par(aryMdlParamsChnk, tplVslSpcSze, varNumVol, aryPixConv, queOut):
     # Number of combinations of model parameters in the current chunk:
     varChnkSze = np.size(aryMdlParamsChnk, axis=0)
 
+    # Number of features (e.g. motion directions):
+    varNumFtr = aryPixConv.shape[0]
+
     # Output array with pRF model time courses:
-    aryOut = np.zeros([varChnkSze, varNumVol])
+    aryOut = np.zeros([varNumFtr, varChnkSze, varNumVol], dtype=np.float32)
 
     # Loop through combinations of model parameters:
-    for idxMdl in range(0, varChnkSze):
+    for idxMdl in range(varChnkSze):
+
+        # Feature index of current model:
+        varTmpFtr = int(aryMdlParamsChnk[idxMdl, 1])
 
         # Depending on the relation between the number of x- and y-positions
         # at which to create pRF models and the size of the super-sampled
         # visual space, the indicies need to be rounded:
-        varTmpX = np.around(aryMdlParamsChnk[idxMdl, 1], 0)
-        varTmpY = np.around(aryMdlParamsChnk[idxMdl, 2], 0)
-        varTmpSd = np.around(aryMdlParamsChnk[idxMdl, 3], 0)
+        varTmpX = np.around(aryMdlParamsChnk[idxMdl, 2], 0)
+        varTmpY = np.around(aryMdlParamsChnk[idxMdl, 3], 0)
+        varTmpSd = np.around(aryMdlParamsChnk[idxMdl, 4], 0)
 
         # Create pRF model (2D):
         aryGauss = crt_gauss(tplVslSpcSze[0],
                              tplVslSpcSze[1],
                              varTmpX,
                              varTmpY,
-                             varTmpSd)
+                             varTmpSd).astype(np.float32)
 
         # Multiply super-sampled pixel-time courses with Gaussian pRF models:
-        aryPrfTcTmp = np.multiply(aryPixConv, aryGauss[:, :, None])
+        aryPrfTcTmp = np.multiply(aryPixConv[varTmpFtr, :, :, :],
+                                  aryGauss[:, :, None])
 
         # Calculate sum across x- and y-dimensions - the 'area under the
         # Gaussian surface'. This is essentially an unscaled version of the pRF
         # time course model (i.e. not yet scaled for the size of the pRF).
-        aryPrfTcTmp = np.sum(aryPrfTcTmp, axis=(0, 1))
+        aryPrfTcTmp = np.sum(aryPrfTcTmp, axis=(0, 1), dtype=np.float32)
 
         # Normalise the pRF time course model to the size of the pRF. This
         # gives us the ratio of 'activation' of the pRF at each time point, or,
@@ -100,13 +107,15 @@ def prf_par(aryMdlParamsChnk, tplVslSpcSze, varNumVol, aryPixConv, queOut):
         #                         np.sum(aryGauss, axis=(0, 1)))
 
         # Put model time courses into the function's output array:
-        aryOut[idxMdl, :] = aryPrfTcTmp
+        aryOut[varTmpFtr, idxMdl, :] = aryPrfTcTmp
 
     # Put column with the indicies of model-parameter-combinations into the
     # output array (in order to be able to put the pRF model time courses into
     # the correct order after the parallelised function):
-    aryOut = np.hstack((np.array(aryMdlParamsChnk[:, 0], ndmin=2).T,
-                        aryOut))
+    aryOut = np.hstack((np.array(aryMdlParamsChnk[:, 0],
+                                 ndmin=2,
+                                 dtype=np.float32).T,
+                        aryOut)).astype(np.float32)
 
     # Put output to queue:
     queOut.put(aryOut)

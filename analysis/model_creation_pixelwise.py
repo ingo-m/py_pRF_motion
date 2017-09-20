@@ -29,9 +29,10 @@ def conv_dsgn_mat(aryPngData, varTr, varPar=10):
 
     Parameters
     ----------
-    aryPngData : np.array
-        3D numpy array with the following structure:
-        aryPngData[x-pixel-index, y-pixel-index, PngNumber]
+    aryPngDataFtr : np.array
+        4D Numpy array containing pixel-wise design matrix, at np.int8
+        precision, with the following structure:
+        aryPngDataFtr[feature, x-position, y-position, time]
     varTr : float
         Volume TR of functional data (needed for convolution of timecourses
         with haemodynamic response function).
@@ -41,8 +42,9 @@ def conv_dsgn_mat(aryPngData, varTr, varPar=10):
     Returns
     -------
     aryPixConv : np.array
-        Numpy array with same dimensions as input (`aryPngData`), with
-        convolved design matrix.
+        Numpy array containing convolved design matrix, with shape
+        `aryPixConv[feature, x-position, y-position, time]` (i.e. same
+        dimensions as input (`aryPngData`).
 
     Notes
     -----
@@ -53,10 +55,10 @@ def conv_dsgn_mat(aryPngData, varTr, varPar=10):
     convolved with an HRF model.
     """
     # Get number of volumes from input array:
-    varNumVol = aryPngData.shape[2]
+    varNumVol = aryPngData.shape[3]
 
-    # Remember original size of PNGs:
-    tplPngSize = (aryPngData.shape[0], aryPngData.shape[1])
+    # Remember original size of design matrix:
+    tplSze = aryPngData.shape
 
     # Create 'canonical' HRF time course model:
     vecHrf = crt_hrf(varNumVol, varTr)
@@ -65,22 +67,20 @@ def conv_dsgn_mat(aryPngData, varTr, varPar=10):
     # be put:
     lstParData = [None] * varPar
 
-    # Number of pixels:
-    varNumPix = aryPngData.shape[0] * aryPngData.shape[1]
+    # Number of data points (features * pixels):
+    varNumPnt = aryPngData.shape[0] * aryPngData.shape[1] * aryPngData.shape[2]
 
     # Reshape png data (so that dimension are
-    # `aryPngData[(x-pixel-index * y-pixel-index), PngNumber]`):
-    aryPngData = np.reshape(aryPngData,
-                            ((aryPngData.shape[0] * aryPngData.shape[1]),
-                             aryPngData.shape[2]))
+    # `aryPngData[(feature * x-position * y-position), PngNumber]`):
+    aryPngData = np.reshape(aryPngData, (varNumPnt, aryPngData.shape[3]))
 
     # Vector with the indicies at which the input data will be separated in
     # order to be chunked up for the parallel processes:
     vecIdxChnks = np.linspace(0,
-                              varNumPix,
+                              varNumPnt,
                               num=varPar,
                               endpoint=False)
-    vecIdxChnks = np.hstack((vecIdxChnks, varNumPix))
+    vecIdxChnks = np.hstack((vecIdxChnks, varNumPnt))
 
     # Put input data into chunks:
     for idxChnk in range(0, varPar):
@@ -155,10 +155,7 @@ def conv_dsgn_mat(aryPngData, varTr, varPar=10):
     # del(lstPixConv)
 
     # Reshape results:
-    aryPixConv = np.reshape(aryPixConv,
-                            [tplPngSize[0],
-                             tplPngSize[1],
-                             varNumVol])
+    aryPixConv = np.reshape(aryPixConv, tplSze)
 
     # Return:
     return aryPixConv

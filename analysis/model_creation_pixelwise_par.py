@@ -31,8 +31,8 @@ def conv_par(idxPrc, aryPngData, vecHrf, queOut):
         index can be used to identify which return value belongs to which
         process).
     aryPngData : np.array
-        2D numpy array with the following structure:
-        `aryPngData[(x-pixel-index * y-pixel-index), PngNumber]`
+        2D numpy array with the following structure: `aryPngData[(feature
+        * x-pixel-index * y-pixel-index), PngNumber]`
     vecHrf : np.array
         1D numpy array with HRF time course model.
     queOut : multiprocessing.queues.Queue
@@ -47,8 +47,8 @@ def conv_par(idxPrc, aryPngData, vecHrf, queOut):
             multi-threading). In GPU version, this parameter is 0.
         aryPixConv : np.array
             Numpy array containing convolved design matrix. Dimensionality:
-            `aryPixConv[(x-pixel-index * y-pixel-index), PngNumber`. Same shape
-            as input (`aryPngData`).
+            `aryPixConv[(feature * x-pixel-index * y-pixel-index), PngNumber]`.
+            Same shape as input (`aryPngData`).
 
     Notes
     -----
@@ -60,7 +60,10 @@ def conv_par(idxPrc, aryPngData, vecHrf, queOut):
     The pixel-wise design matrix is convolved with an HRF model.
     """
     # Array for function output (convolved pixel-wise time courses):
-    aryPixConv = np.zeros(np.shape(aryPngData))
+    aryPixConv = np.zeros(np.shape(aryPngData), dtype=np.float32)
+
+    # Explicity typing:
+    vecHrf = vecHrf.astype(np.float32)
 
     # Number of volumes:
     varNumVol = aryPngData.shape[1]
@@ -71,19 +74,20 @@ def conv_par(idxPrc, aryPngData, vecHrf, queOut):
     for idxPix in range(0, aryPngData.shape[0]):
 
         # Extract the current pixel time course:
-        vecDm = aryPngData[idxPix, :]
+        vecDm = aryPngData[idxPix, :].astype(np.float32)
 
         # In order to avoid an artefact at the end of the time series, we have
         # to concatenate an empty array to both the design matrix and the HRF
         # model before convolution.
-        vecZeros = np.zeros([100, 1]).flatten()
+        vecZeros = np.zeros([100, 1], dtype=np.float32).flatten()
         vecDm = np.concatenate((vecDm, vecZeros))
         vecHrf = np.concatenate((vecHrf, vecZeros))
 
         # Convolve design matrix with HRF model:
         aryPixConv[idxPix, :] = np.convolve(vecDm,
                                             vecHrf,
-                                            mode='full')[0:varNumVol]
+                                            mode='full'
+                                            )[0:varNumVol].astype(np.float32)
 
     # Create list containing the convolved pixel-wise timecourses, and the
     # process ID:

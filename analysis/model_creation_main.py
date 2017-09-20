@@ -19,10 +19,10 @@
 
 import numpy as np
 import nibabel as nb
-import pickle
 from model_creation_load_png import load_png
 from model_creation_pixelwise import conv_dsgn_mat
 from model_creation_timecourses import crt_prf_tcmdl
+from model_creation_features import append_features
 
 import config as cfg
 
@@ -44,7 +44,7 @@ def model_creation():
     if cfg.lgcCrteMdl:  #noqa
 
         # *********************************************************************
-        # *** Load stimulus information from PNG files:
+        # *** Load stimulus information from PNG files
 
         print('------Load stimulus information from PNG files')
 
@@ -55,29 +55,16 @@ def model_creation():
                               varZfill=cfg.varZfill)
         # *********************************************************************
 
-
         # *********************************************************************
-        # *** Account for motion directions
+        # *** Append additional stimulus features (e.g. motion direction)
 
-        # List for arrays with motion directions
-        lstMtn = []
+        print('------Append additional stimulus features')
 
-        # Loop through pickle files with information on motion direction:
-        for strTmp in cfg.lstDsgn:
-            with open(strTmp, 'r') as objPckl:
-                # The second column of the respective array holds information
-                # on motion directions:
-                lstMtn.append(pickle.load(objPckl)['Conditions'][:, 1])
-
-        # Concatenate motion direction arrays from all runs:
-        aryMtn = np.hstack(lstMtn)
-
-
-
-        # TODO: Create hdf5 pRF model time courses.
-
-
-
+        # Additional stimulus feature dimension is added to the pixel-wise
+        # design matrix, now of shape aryPngDataFtr[feature, x-position,
+        # y-position, time] at int8 precision.
+        aryPngData = append_features(aryPngData,
+                                     cfg.lstDsgn)
         # *********************************************************************
 
         # *********************************************************************
@@ -101,6 +88,7 @@ def model_creation():
         print('------Create pRF time course models')
 
         aryPrfTc = crt_prf_tcmdl(aryPixConv,
+                                 cfg.strDirHdf,
                                  tplVslSpcSze=cfg.tplVslSpcSze,
                                  varNumX=cfg.varNumX,
                                  varNumY=cfg.varNumY,
@@ -124,7 +112,7 @@ def model_creation():
                 aryPrfTc)
 
         # Save 4D array as '*.nii' file (for debugging purposes):
-        niiPrfTc = nb.Nifti1Image(aryPrfTc, np.eye(4))
+        niiPrfTc = nb.Nifti1Image(np.max(aryPrfTc, axis=0), np.eye(4))
         nb.save(niiPrfTc, cfg.strPathMdl)
         # *********************************************************************
 
@@ -143,13 +131,13 @@ def model_creation():
         vecPrfTcShp = aryPrfTc.shape
 
         # Logical test for correct dimensions:
-        lgcDim = ((vecPrfTcShp[0] == cfg.varNumX)
+        lgcDim = ((vecPrfTcShp[1] == cfg.varNumX)
                   and
-                  (vecPrfTcShp[1] == cfg.varNumY)
+                  (vecPrfTcShp[2] == cfg.varNumY)
                   and
-                  (vecPrfTcShp[2] == cfg.varNumPrfSizes)
+                  (vecPrfTcShp[3] == cfg.varNumPrfSizes)
                   and
-                  (vecPrfTcShp[3] == cfg.varNumVol))
+                  (vecPrfTcShp[4] == cfg.varNumVol))
 
         # Only fit pRF models if dimensions of pRF time course models are
         # correct:

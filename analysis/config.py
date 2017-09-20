@@ -131,3 +131,7 @@ lstDsgn = ['/home/john/Documents/20161221/retinotopy/design_matrix/Conditions_ru
 # motion_log.py (in order to create PNGs for static component of motion pRF
 # mapping).
 strShpe = '~/mskBar.npz'
+
+# Directory at which hdf5 files with design matrix and functional data will be
+# stored (in order to avoid memory overflow). Should be on a fast SSD drive.
+strDirHdf = '/home/john/Documents/20161221/retinotopy/hdf5/'

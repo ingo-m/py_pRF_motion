@@ -22,19 +22,21 @@ import multiprocessing as mp
 from model_creation_timecourses_par import prf_par
 
 
-def crt_prf_tcmdl(aryPixConv, tplVslSpcSze=(200, 200), varNumX=40, varNumY=40,  #noqa
-                  varExtXmin=-5.19, varExtXmax=5.19, varExtYmin=-5.19,
-                  varExtYmax=5.19, varPrfStdMin=0.1, varPrfStdMax=7.0,
-                  varNumPrfSizes=40, varPar=10):
+def crt_prf_tcmdl(aryPixConv, strDirHdf, tplVslSpcSze=(200, 200), varNumX=40,
+                  varNumY=40, varExtXmin=-5.19, varExtXmax=5.19,
+                  varExtYmin=-5.19, varExtYmax=5.19, varPrfStdMin=0.1,
+                  varPrfStdMax=7.0, varNumPrfSizes=40, varPar=10):
     """
     Create pRF time courses models.
 
     Parameters
     ----------
     aryPixConv : np.array
-        3D numpy array containing the pixel-wise, HRF-convolved design matrix,
-        with the following structure: `aryPixConv[x-pixel-index, y-pixel-index,
-        PngNumber]`
+        4D numpy array containing HRF-convolved pixel-wise design matrix, with
+        shape `aryPixConv[feature, x-position, y-position, time]`.
+    strDirHdf : string
+        Path for storing hdf5 file with pRF time course models. [Ignored,
+        included for future development.]
     tplVslSpcSze : tuple
         Pixel size of visual space model in which the pRF models are created
         (x- and y-dimension).
@@ -58,10 +60,10 @@ def crt_prf_tcmdl(aryPixConv, tplVslSpcSze=(200, 200), varNumX=40, varNumY=40,  
         Extent of visual space from centre of the screen in positive
         y-direction (i.e. from the fixation point to the upper end of the
         screen) in degrees of visual angle.
-    varPrfStdMin : flaot
+    varPrfStdMin : float
         Minimum pRF model size (standard deviation of 2D Gaussian) in  degrees
         of visual angle.
-    varPrfStdMax : flaot
+    varPrfStdMax : float
         Maximum pRF model size (standard deviation of 2D Gaussian) in  degrees
         of visual angle.
     varNumPrfSizes : int
@@ -73,7 +75,7 @@ def crt_prf_tcmdl(aryPixConv, tplVslSpcSze=(200, 200), varNumX=40, varNumY=40,  
     -------
     aryPrfTc4D : np.array
         4D numpy array with pRF time course models, with following dimensions:
-        `aryPrfTc4D[x-position, y-position, SD, volume]`.
+        `aryPrfTc4D[feature, x-position, y-position, SD, volume]`.
 
     Notes
     -----
@@ -81,7 +83,10 @@ def crt_prf_tcmdl(aryPixConv, tplVslSpcSze=(200, 200), varNumX=40, varNumY=40,  
     fitting model for each voxel will be selected.
     """
     # Number of volumes:
-    varNumVol = aryPixConv.shape[2]
+    varNumVol = aryPixConv.shape[3]
+
+    # Number of features (e.g. motion directions):
+    varNumFtr = aryPixConv.shape[0]
 
     # Only fit pRF models if dimensions of pRF time course models are
     # correct:
@@ -138,38 +143,43 @@ def crt_prf_tcmdl(aryPixConv, tplVslSpcSze=(200, 200), varNumX=40, varNumY=40,  
 
     # Number of pRF models to be created (i.e. number of possible combinations
     # of x-position, y-position, and standard deviation):
-    varNumMdls = varNumX * varNumY * varNumPrfSizes
+    varNumMdls = varNumFtr * varNumX * varNumY * varNumPrfSizes
 
     # Array for the x-position, y-position, and standard deviations for which
     # pRF model time courses are going to be created, where the columns
-    # correspond to: (0) an index starting from zero, (1) the x-position, (2)
-    # the y-position, and (3) the standard deviation. The parameters are in
+    # correspond to: (0) an index starting from zero, (1) an additional
+    # stimulus feature (e.g. motion direction), (2) the x-position, (3)
+    # the y-position, and (4) the standard deviation. The parameters are in
     # units of the upsampled visual space.
-    aryMdlParams = np.zeros((varNumMdls, 4))
+    aryMdlParams = np.zeros((varNumMdls, 5))
 
     # Counter for parameter array:
     varCntMdlPrms = 0
 
-    # Put all combinations of x-position, y-position, and standard deviations
-    # into the array:
+    # Put all combinations of features, x-position, y-position, and standard
+    # deviations into the array:
 
-    # Loop through x-positions:
-    for idxX in range(0, varNumX):
+    # Loop through features (e.g. motion direction):
+    for idxFtr in range(varNumFtr):
 
-        # Loop through y-positions:
-        for idxY in range(0, varNumY):
-
-            # Loop through standard deviations (of Gaussian pRF models):
-            for idxSd in range(0, varNumPrfSizes):
-
-                # Place index and parameters in array:
-                aryMdlParams[varCntMdlPrms, 0] = varCntMdlPrms
-                aryMdlParams[varCntMdlPrms, 1] = vecX[idxX]
-                aryMdlParams[varCntMdlPrms, 2] = vecY[idxY]
-                aryMdlParams[varCntMdlPrms, 3] = vecPrfSd[idxSd]
-
-                # Increment parameter index:
-                varCntMdlPrms = varCntMdlPrms + 1
+        # Loop through x-positions:
+        for idxX in range(varNumX):
+    
+            # Loop through y-positions:
+            for idxY in range(varNumY):
+    
+                # Loop through standard deviations (of Gaussian pRF models):
+                for idxSd in range(varNumPrfSizes):
+    
+                    # Place index and parameters in array:
+                    aryMdlParams[varCntMdlPrms, 0] = varCntMdlPrms
+                    aryMdlParams[varCntMdlPrms, 1] = idxFtr
+                    aryMdlParams[varCntMdlPrms, 2] = vecX[idxX]
+                    aryMdlParams[varCntMdlPrms, 3] = vecY[idxY]
+                    aryMdlParams[varCntMdlPrms, 4] = vecPrfSd[idxSd]
+    
+                    # Increment parameter index:
+                    varCntMdlPrms = varCntMdlPrms + 1
 
     # The long array with all the combinations of model parameters is put into
     # separate chunks for parallelisation, using a list of arrays.
@@ -251,10 +261,12 @@ def crt_prf_tcmdl(aryPixConv, tplVslSpcSze=(200, 200), varNumX=40, varNumY=40,  
     # Array representing the low-resolution visual space, of the form
     # aryPrfTc[x-position, y-position, pRF-size, varNum Vol], which will hold
     # the pRF model time courses.
-    aryPrfTc4D = np.zeros([varNumX,
+    aryPrfTc4D = np.zeros((varNumFtr,
+                           varNumX,
                            varNumY,
                            varNumPrfSizes,
-                           varNumVol])
+                           varNumVol),
+                          dtype=np.float32)
 
     # We use the same loop structure for organising the pRF model time courses
     # that we used for creating the parameter array. Counter:
@@ -263,22 +275,26 @@ def crt_prf_tcmdl(aryPixConv, tplVslSpcSze=(200, 200), varNumX=40, varNumY=40,  
     # Put all combinations of x-position, y-position, and standard deviations
     # into the array:
 
-    # Loop through x-positions:
-    for idxX in range(0, varNumX):
+    # Loop through features (e.g. motion direction):
+    for idxFtr in range(varNumFtr):
 
-        # Loop through y-positions:
-        for idxY in range(0, varNumY):
-
-            # Loop through standard deviations (of Gaussian pRF models):
-            for idxSd in range(0, varNumPrfSizes):
-
-                # Put the pRF model time course into its correct position in
-                # the 4D array, leaving out the first column (which contains
-                # the index):
-                aryPrfTc4D[idxX, idxY, idxSd, :] = aryPrfTc[varCntMdlPrms, 1:]
-
-                # Increment parameter index:
-                varCntMdlPrms = varCntMdlPrms + 1
+        # Loop through x-positions:
+        for idxX in range(varNumX):
+    
+            # Loop through y-positions:
+            for idxY in range(varNumY):
+    
+                # Loop through standard deviations (of Gaussian pRF models):
+                for idxSd in range(varNumPrfSizes):
+    
+                    # Put the pRF model time course into its correct position in
+                    # the 4D array, leaving out the first column (which contains
+                    # the index):
+                    aryPrfTc4D[idxFtr, idxX, idxY, idxSd, :] = \
+                        aryPrfTc[varCntMdlPrms, 1:].astype(np.float32)
+    
+                    # Increment parameter index:
+                    varCntMdlPrms = varCntMdlPrms + 1
 
     # Return
     return aryPrfTc4D
