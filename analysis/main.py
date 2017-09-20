@@ -82,6 +82,13 @@ for idxFtr in range(varNumFtr):
                                          varSdSmthTmp=cfg.varSdSmthTmp,
                                          varPar=cfg.varPar)
 
+print('---------Swap axes of aryPrfTc')
+
+# Change order of axes in order to fit with GPU function:
+aryPrfTc = np.moveaxis(aryPrfTc,
+                       [0, 1, 2, 3, 4],
+                       [3, 0, 1, 2, 4])
+
 # Preprocessing of functional data:
 aryLgcMsk, hdrMsk, aryAff, aryLgcVar, aryFunc, tplNiiShp = pre_pro_func(
     cfg.strPathNiiMask, cfg.lstPathNiiFunc, lgcLinTrnd=cfg.lgcLinTrnd,
@@ -197,6 +204,7 @@ elif cfg.strVersion == 'gpu':
                                            vecMdlSd,
                                            lstFunc[idxPrc],
                                            aryPrfTc,
+                                           cfg.varL2reg,
                                            queOut)
                                      )
         # Daemon (kills processes when exiting):

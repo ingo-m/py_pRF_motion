@@ -91,7 +91,10 @@ strPathOut = '/home/john/Documents/20161221/retinotopy/pRF_results_motion/pRF_re
 
 # Which version to use for pRF finding. 'numpy' or 'cython' for pRF finding on
 # CPU, 'gpu' for using GPU.
-strVersion = 'numpy'  # 'gpu'
+strVersion = 'gpu'
+
+# L2 regularisation factor:
+varL2reg = 0.0
 
 # Create pRF time course models?
 lgcCrteMdl = True
