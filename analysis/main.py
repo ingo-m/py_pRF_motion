@@ -202,7 +202,7 @@ if ((cfg.strVersion == 'numpy') or (cfg.strVersion == 'cython')):
         # Daemon (kills processes when exiting):
         lstPrcs[idxPrc].Daemon = True
 
-# CPU version (using numpy or cython for pRF finding):
+# GPU version (using tensorflow for pRF finding):
 elif cfg.strVersion == 'gpu':
 
     print('---------pRF finding on GPU')

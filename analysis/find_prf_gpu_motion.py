@@ -88,10 +88,10 @@ def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
 
         while True:
 
-            # Feed example to Tensorflow placeholder
-            aryTmp02 = lstPrfTc[idxCnt]
+            # Feed pRF time course to tensorflow placeholder:
+            aryTmpDsgn = lstPrfTc[idxCnt]
 
-            dicIn = {objPlcHld01: aryTmp02}
+            dicIn = {objPlcHld01: aryTmpDsgn}
 
             # Push to the queue:
             objSess.run(objEnQ, feed_dict=dicIn)
@@ -320,7 +320,7 @@ def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
             # -----------------------------------------------------------------
             # *** Prepare queue
 
-            print('------Define computational graph, queue & session')
+            # print('------Define computational graph, queue & session')
 
             # Queue capacity:
             varCapQ = 10
