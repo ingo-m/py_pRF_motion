@@ -17,11 +17,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Number of x-positions to model:
-varNumX = 10
+varNumX = 40
 # Number of y-positions to model:
-varNumY = 10
+varNumY = 40
 # Number of pRF sizes to model:
-varNumPrfSizes = 15
+varNumPrfSizes = 50
 
 # Extent of visual space from centre of the screen in negative x-direction
 # (i.e. from the fixation point to the left end of the screen) in degrees of
@@ -43,7 +43,7 @@ varExtYmax = 5.19
 # Maximum and minimum pRF model size (standard deviation of 2D Gaussian)
 # [degrees of visual angle]:
 varPrfStdMin = 0.1
-varPrfStdMax = 7.0
+varPrfStdMax = 8.0
 
 # Volume TR of input data [s]:
 varTr = 2.832
@@ -74,17 +74,17 @@ varPar = 11
 # specified above. In other words, if the the resolution in x-direction of the
 # visual space model is ten times that of varNumX, the resolution in
 # y-direction also has to be ten times varNumY. The order is: first x, then y.
-tplVslSpcSze = (60, 60)
+tplVslSpcSze = (200, 200)
 
 # Path of functional data (needs to have same number of volumes as there are
 # PNGs):
-lstPathNiiFunc = ['/home/john/Documents/20161221/func_regAcrssRuns_cube/func_07.nii',
-                  '/home/john/Documents/20161221/func_regAcrssRuns_cube/func_08.nii',
-                  '/home/john/Documents/20161221/func_regAcrssRuns_cube/func_09.nii',
-                  '/home/john/Documents/20161221/func_regAcrssRuns_cube/func_10.nii']  #noqa
+lstPathNiiFunc = ['/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_07_up_aniso_smth.nii',
+                  '/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_08_up_aniso_smth.nii',
+                  '/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_09_up_aniso_smth.nii',
+                  '/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_10_up_aniso_smth.nii']  #noqa
 
 # Path of mask (to restrict pRF model finding):
-strPathNiiMask = '/home/john/Documents/20161221/retinotopy/mask/20161221_mp2rage_seg_v26_gm_down_bin_gmcube.nii.gz'  #noqa
+strPathNiiMask = '/home/john/Documents/20161221/retinotopy/mask/20161221_mp2rage_seg_v26_gm.nii.gz'  #noqa
 
 # Output basename:
 strPathOut = '/home/john/Documents/20161221/retinotopy/pRF_results_motion/pRF_results'  #noqa
@@ -97,7 +97,7 @@ strVersion = 'gpu'
 varL2reg = 0.0
 
 # Create pRF time course models?
-lgcCrteMdl = True
+lgcCrteMdl = False
 
 # If we create new pRF time course models, the following parameters have to
 # be provided:
