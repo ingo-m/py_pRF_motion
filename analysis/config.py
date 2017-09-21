@@ -65,7 +65,8 @@ lgcLinTrnd = True
 # Number of fMRI volumes and png files to load:
 varNumVol = 4 * 172
 
-# Number of processes to run in parallel:
+# Number of processes to run in parallel (only relevant for model creation and
+# preprocessing):
 varPar = 11
 
 # Size of high-resolution visual space model in which the pRF models are
@@ -88,10 +89,6 @@ strPathNiiMask = '/home/john/Documents/20161221/retinotopy/mask/20161221_mp2rage
 
 # Output basename:
 strPathOut = '/home/john/Documents/20161221/retinotopy/pRF_results_motion/pRF_results'  #noqa
-
-# Which version to use for pRF finding. 'numpy' or 'cython' for pRF finding on
-# CPU, 'gpu' for using GPU.
-strVersion = 'gpu'
 
 # L2 regularisation factor:
 varL2reg = 0.0
@@ -134,6 +131,10 @@ lstDsgn = ['/home/john/Documents/20161221/retinotopy/design_matrix/Conditions_ru
 # motion_log.py (in order to create PNGs for static component of motion pRF
 # mapping).
 strShpe = '~/mskBar.npz'
+
+# We cannot commit the entire functional data to GPU memory, we need to create
+# chunks. Number of voxels per chunk:
+varVoxPerChnk = 1000
 
 # Directory at which hdf5 files with design matrix and functional data will be
 # stored (in order to avoid memory overflow). Should be on a fast SSD drive.
