@@ -263,7 +263,7 @@ queFunc = mp.Queue(maxsize=10)
 queDsgn = mp.Queue(maxsize=100)
 
 # Create a queue for results:
-queRes = mp.Queue(maxsize=100)
+queRes = mp.Queue(maxsize=1)  # GET MORE
 
 # Start function that loads functional data:
 prcPutFunc = mp.Process(target=put_func,

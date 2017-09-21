@@ -54,55 +54,43 @@ def find_prf_gpu(varNumMdls, varNumChnk, varVoxPerChnk, varNumVol, varNumBeta,
 
     def funcPlcDsgn():
         """Place pRF model time courses on queue."""
-        # Iteration counter:
-        idxCnt = 0
+        # Loop through chunks of functional data:
+        for idxChnk in range(varNumChnk):
 
-        while True:
+            # Loop through models:
+            for idxMdl in range(varNumMdls):
 
-            # Get design matrix from queue:
-            aryDsgnTmp = queDsgn.get(True)
+                # Get design matrix from queue:
+                aryDsgnTmp = queDsgn.get(True)
 
-            # Feed design matrix Tensorflow placeholder
-            dicDsgnIn = {objPlcHldDsgn: aryDsgnTmp}
+                # print('aryDsgnTmp.shape')
+                # print(aryDsgnTmp.shape)
 
-            # Push to the queue:
-            objSess.run(objDsgnEnQ, feed_dict=dicDsgnIn)
+                # Feed design matrix Tensorflow placeholder
+                dicDsgnIn = {objPlcHldDsgn: aryDsgnTmp}
 
-            idxCnt += 1
-
-            # Stop if coordinator says stop:
-            if objCoord.should_stop():
-                break
-
-            # Stop if all data has been put on the queue:
-            elif idxCnt == varNumIt:
-                break
+                # Push to the queue:
+                objSess.run(objDsgnEnQ, feed_dict=dicDsgnIn)
 
     def funcPlcFunc():
         """Place functional data on queue."""
-        # Iteration counter:
-        idxCnt = 0
-
-        while True:
+        # Loop through chunks of functional data:
+        for idxChnk in range(varNumChnk):
 
             # Get design matrix from queue:
             aryFuncTmp = queFunc.get(True)
 
-            # Feed design matrix Tensorflow placeholder
-            dicFuncIn = {objPlcHldFunc: aryFuncTmp}
+            # print('aryFuncTmp.shape')
+            # print(aryFuncTmp.shape)
 
-            # Push to the queue:
-            objSess.run(objFuncEnQ, feed_dict=dicFuncIn)
+            # Loop through models:
+            for idxMdl in range(varNumMdls):
 
-            idxCnt += 1
+                # Feed design matrix Tensorflow placeholder
+                dicFuncIn = {objPlcHldFunc: aryFuncTmp}
 
-            # Stop if coordinator says stop:
-            if objCoord.should_stop():
-                break
-
-            # Stop if all data has been put on the queue:
-            elif idxCnt == varNumIt:
-                break
+                # Push to the queue:
+                objSess.run(objFuncEnQ, feed_dict=dicFuncIn)
 
     # -------------------------------------------------------------------------
     # *** Miscellaneous preparations
@@ -147,7 +135,7 @@ def find_prf_gpu(varNumMdls, varNumChnk, varVoxPerChnk, varNumVol, varNumBeta,
     varCntSts02 = 0
 
     # -------------------------------------------------------------------------
-    # *** Loop through chunks
+    # *** Main
 
     print('------Run graph')
 
