@@ -44,7 +44,7 @@ def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
         2D array with functional MRI data, with shape aryFunc[voxel, time].
     aryPrfTc : np.array
         Array with pRF model time courses, with shape
-        aryPrfTc[x-pos, y-pos, SD, motion-direction, time]
+        aryPrfTc[x-pos, y-pos, SD, time, feature]
     varL2reg : float
         L2 regularisation factor for ridge regression.
     queOut : multiprocessing.queues.Queue
@@ -90,6 +90,7 @@ def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
 
             # Feed example to Tensorflow placeholder
             aryTmp02 = lstPrfTc[idxCnt]
+
             dicIn = {objPlcHld01: aryTmp02}
 
             # Push to the queue:
@@ -116,10 +117,10 @@ def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
     varNumPrfSizes = np.shape(vecMdlSd)[0]
 
     # Number of predictors (betas):
-    varNumBeta = aryPrfTc.shape[3]
+    varNumBeta = aryPrfTc.shape[4]
 
     # At this point, aryPrfTc has the following dimensions:
-    # aryPrfTc[x-pos, y-pos, SD, motion-direction, time]
+    # aryPrfTc[x-pos, y-pos, SD, time, feature]
 
     # Reshape pRF model time courses:
     aryPrfTc = np.reshape(aryPrfTc,
@@ -130,7 +131,7 @@ def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
                            aryPrfTc.shape[4]))
 
     # Now, aryPrfTc has the following dimensions:
-    # aryPrfTc[(x-pos * y-pos * SD), motion-direction, time]
+    # aryPrfTc[(x-pos * y-pos * SD), time, feature]
 
     # Original total number of pRF time course models (before removing models
     # with zero variance):
@@ -140,11 +141,11 @@ def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
     aryPrfTc = aryPrfTc.astype(np.float32)
 
     # The pRF model is fitted only if variance along time dimension is not
-    # zero. Get variance along time dimension:
-    vecVarPrfTc = np.var(aryPrfTc, axis=2)
+    # very low. Get variance along time dimension:
+    vecVarPrfTc = np.var(aryPrfTc, axis=1)
 
-    # Zero with float32 precision for comparison:
-    varZero32 = np.array(([0.0])).astype(np.float32)[0]
+    # Low value with float32 precision for comparison:
+    varZero32 = np.array(([1.0])).astype(np.float32)[0]
 
     # Boolean array for models with variance greater than zero for at least
     # one motion direction:
@@ -156,10 +157,6 @@ def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
 
     # Take models with variance less than zero out of the array:
     aryPrfTc = aryPrfTc[vecLgcVar, :, :]
-
-    # Swap axes, so that
-    # aryPrfTc[(x-pos * y-pos * SD), time, motion-direction]
-    aryPrfTc = np.swapaxes(aryPrfTc, 1, 2)
 
     # Add constant term (ones):
     # aryPrfTc = np.concatenate((aryPrfTc,
@@ -331,13 +328,13 @@ def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
             # Dimensions of placeholder have to be determined outside of the
             # tensor object, otherwise the object on which the size is
             # calculated is loaded into GPU memory.
-            varDim01 = lstPrfTc[0].shape[0]
-            varDim02 = lstPrfTc[0].shape[1]
+            varDimTme = lstPrfTc[0].shape[0]
+            varDimFtr = lstPrfTc[0].shape[1]
 
             # The queue:
             objQ = tf.FIFOQueue(capacity=varCapQ,
                                 dtypes=[tf.float32],
-                                shapes=[(varDim01, varDim02)])
+                                shapes=[(varDimTme, varDimFtr)])
 
             # Method for getting queue size:
             objSzeQ = objQ.size()
@@ -345,7 +342,7 @@ def find_prf_gpu(idxPrc, vecMdlXpos, vecMdlYpos, vecMdlSd, aryFunc,  # noqa
             # Placeholder that is used to put design matrix on computational
             # graph:
             objPlcHld01 = tf.placeholder(tf.float32,
-                                         shape=[varDim01, varDim02])
+                                         shape=[varDimTme, varDimFtr])
 
             # The enqueue operation that puts data on the graph.
             objEnQ = objQ.enqueue([objPlcHld01])

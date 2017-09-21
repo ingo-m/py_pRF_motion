@@ -84,16 +84,28 @@ for idxFtr in range(varNumFtr):
 
 print('---------Swap axes of aryPrfTc')
 
-# Change order of axes in order to fit with GPU function:
+# Change order of axes in order to fit with GPU function, from
+# aryPrfTc[feature, x-position, y-position, SD, time] to
+# aryPrfTc[x-position, y-position, SD, time, feature].
 aryPrfTc = np.moveaxis(aryPrfTc,
                        [0, 1, 2, 3, 4],
-                       [3, 0, 1, 2, 4])
+                       [4, 0, 1, 2, 3])
+
+# At this point, the pRF model time course have been z-scored. In order to
+# avoid precision problems during GLM fitting, we scale them up.
+aryPrfTc = np.multiply(aryPrfTc,
+                       1000.0).astype(np.float32)
 
 # Preprocessing of functional data:
 aryLgcMsk, hdrMsk, aryAff, aryLgcVar, aryFunc, tplNiiShp = pre_pro_func(
     cfg.strPathNiiMask, cfg.lstPathNiiFunc, lgcLinTrnd=cfg.lgcLinTrnd,
     varSdSmthTmp=cfg.varSdSmthTmp, varSdSmthSpt=cfg.varSdSmthSpt,
     varPar=cfg.varPar)
+
+# At this point, the funtional time courses have been z-scored. In order to
+# avoid precision problems during GLM fitting, we scale them up.
+aryFunc = np.multiply(aryFunc,
+                      1000.0).astype(np.float32)
 # *****************************************************************************
 
 
