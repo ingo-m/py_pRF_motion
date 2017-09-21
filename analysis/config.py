@@ -53,7 +53,7 @@ varVoxRes = 0.8
 
 # Extent of temporal smoothing for fMRI data and pRF time course models
 # [standard deviation of the Gaussian kernel, in seconds]:
-varSdSmthTmp = 2.832
+varSdSmthTmp = 0.0  # 2.832
 
 # Extent of spatial smoothing for fMRI data [standard deviation of the Gaussian
 # kernel, in mm]
@@ -134,7 +134,7 @@ strShpe = '~/mskBar.npz'
 
 # We cannot commit the entire functional data to GPU memory, we need to create
 # chunks. Number of voxels per chunk:
-varVoxPerChnk = 30000
+varVoxPerChnk = 25000
 
 # Directory at which hdf5 files with design matrix and functional data will be
 # stored (in order to avoid memory overflow). Should be on a fast SSD drive.

@@ -20,7 +20,7 @@
 
 def get_res(varNumChnk, varNumMdls, vecLgcVar, queRes):
     """"A."""
-    lgcTmp = True
+    varCnt = 0
 
     # Loop through chunks of functional data:
     for idxChnk in range(varNumChnk):
@@ -30,12 +30,12 @@ def get_res(varNumChnk, varNumMdls, vecLgcVar, queRes):
 
             aryTmp = queRes.get(True)
 
-            if lgcTmp:
+            if varCnt < 10:
                 print('aryTmp.shape')
                 print(aryTmp.shape)
-                print('aryTmp[0:20]')
-                print(aryTmp[0:20])
-                lgcTmp = False
+                print('aryTmp[0:5]')
+                print(aryTmp[0:5])
+                varCnt += 1
 
 #    # Array for results of current chunk:
 #    aryTmpRes = np.zeros((varNumMdls,

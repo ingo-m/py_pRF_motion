@@ -83,11 +83,11 @@ def find_prf_gpu(varNumMdls, varNumChnk, varVoxPerChnk, varNumVol, varNumBeta,
             # print('aryFuncTmp.shape')
             # print(aryFuncTmp.shape)
 
+            # Feed design matrix Tensorflow placeholder
+            dicFuncIn = {objPlcHldFunc: aryFuncTmp}
+
             # Loop through models:
             for idxMdl in range(varNumMdls):
-
-                # Feed design matrix Tensorflow placeholder
-                dicFuncIn = {objPlcHldFunc: aryFuncTmp}
 
                 # Push to the queue:
                 objSess.run(objFuncEnQ, feed_dict=dicFuncIn)
@@ -149,7 +149,7 @@ def find_prf_gpu(varNumMdls, varNumChnk, varVoxPerChnk, varNumVol, varNumBeta,
         print('------Prepare queue for pRF time courses')
 
         # Queue capacity:
-        varCapDsgnQ = 10
+        varCapDsgnQ = 100
 
         # The queue:
         objDsgnQ = tf.FIFOQueue(capacity=varCapDsgnQ,
@@ -184,7 +184,7 @@ def find_prf_gpu(varNumMdls, varNumChnk, varVoxPerChnk, varNumVol, varNumBeta,
         print('------Prepare queue for functional data')
 
         # Queue capacity:
-        varCapFuncQ = 10
+        varCapFuncQ = 100
 
         # The queue:
         objFuncQ = tf.FIFOQueue(capacity=varCapFuncQ,
