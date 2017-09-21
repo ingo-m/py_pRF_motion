@@ -79,13 +79,13 @@ tplVslSpcSze = (200, 200)
 
 # Path of functional data (needs to have same number of volumes as there are
 # PNGs):
-lstPathNiiFunc = ['/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_07_up_aniso_smth.nii',
-                  '/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_08_up_aniso_smth.nii',
-                  '/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_09_up_aniso_smth.nii',
-                  '/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_10_up_aniso_smth.nii']  #noqa
+lstPathNiiFunc = ['/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_07_up_aniso_smth.nii'] #,
+                  #'/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_08_up_aniso_smth.nii'',
+                  #'/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_09_up_aniso_smth.nii',
+                  #'/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_10_up_aniso_smth.nii']  #noqa
 
 # Path of mask (to restrict pRF model finding):
-strPathNiiMask = '/home/john/Documents/20161221/retinotopy/mask/20161221_mp2rage_seg_v26_gm.nii.gz'  #noqa
+strPathNiiMask = '/home/john/Documents/20161221/retinotopy/mask/tmp_gm_evc.nii.gz'  # '/home/john/Documents/20161221/retinotopy/mask/20161221_mp2rage_seg_v26_gm.nii.gz'  #noqa
 
 # Output basename:
 strPathOut = '/home/john/Documents/20161221/retinotopy/pRF_results_motion/pRF_results'  #noqa
@@ -134,7 +134,7 @@ strShpe = '~/mskBar.npz'
 
 # We cannot commit the entire functional data to GPU memory, we need to create
 # chunks. Number of voxels per chunk:
-varVoxPerChnk = 1000
+varVoxPerChnk = 5000
 
 # Directory at which hdf5 files with design matrix and functional data will be
 # stored (in order to avoid memory overflow). Should be on a fast SSD drive.

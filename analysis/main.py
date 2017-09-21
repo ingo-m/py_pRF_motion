@@ -127,6 +127,9 @@ del(vecVarPrfTc)
 # Take models with variance less than zero out of the array:
 aryPrfTc = aryPrfTc[vecLgcVar, :, :]
 
+# Number of remaining models:
+varNumMdls = aryPrfTc.shape[0]
+
 # Write pRF model time courses to disk (in hdf5 format). Shape of the data:
 # aryPrfTc[(x-pos * y-pos * SD), time, feature]. Models with low variance are
 # not included.
@@ -152,7 +155,6 @@ del(aryPrfTc)
 # *****************************************************************************
 # ***  Preprocessing of functional data
 
-
 # Preprocessing of functional data:
 aryLgcMsk, hdrMsk, aryAff, aryLgcVar, aryFunc, tplNiiShp = pre_pro_func(
     cfg.strPathNiiMask, cfg.lstPathNiiFunc, lgcLinTrnd=cfg.lgcLinTrnd,
@@ -172,6 +174,9 @@ print('---------Number of voxels on which pRF finding will be performed: '
 
 # Write preprocessed functional data to disk (in hdf5 format). Shape of the
 # data: aryFunc[voxelCount, time].
+
+# Number of volumes:
+varNumVol = aryFunc.shape[1]
 
 print('---------Writing preprocessed functional data to disk')
 
@@ -277,12 +282,23 @@ prcPutDsgn = mp.Process(target=put_design,
 
 # Start function that performs pRF model finding:
 prcSolve = mp.Process(target=find_prf_gpu,
-                      args=()
+                      args=(varNumMdls,
+                            varNumChnk,
+                            cfg.varVoxPerChnk,
+                            varNumVol,
+                            varNumFtr,
+                            cfg.varL2reg,
+                            queDsgn,
+                            queFunc,
+                            queRes)
                       )
 
 # Start function that collects results:
 prcGetRes = mp.Process(target=get_res,
-                       args=()
+                       args=(varNumChnk,
+                             varNumMdls,
+                             vecLgcVar,
+                             queRes)
                        )
 
 # Daemon (kills processes when exiting):
@@ -304,7 +320,7 @@ prcPutFunc.join()
 prcPutDsgn.join()
 
 # Collect results from queue:
-lstPrfRes[idxPrc] = queOut.get(True)
+# lstPrfRes[idxPrc] = queOut.get(True)
 # *****************************************************************************
 
 
