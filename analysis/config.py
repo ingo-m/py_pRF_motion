@@ -49,7 +49,7 @@ varPrfStdMax = 8.0
 varTr = 2.832
 
 # Voxel resolution of the fMRI data [mm]:
-varVoxRes = 0.4
+varVoxRes = 0.8
 
 # Extent of temporal smoothing for fMRI data and pRF time course models
 # [standard deviation of the Gaussian kernel, in seconds]:
@@ -78,16 +78,16 @@ tplVslSpcSze = (200, 200)
 
 # Path of functional data (needs to have same number of volumes as there are
 # PNGs):
-lstPathNiiFunc = ['/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_07_up_aniso_smth.nii',
-                  '/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_08_up_aniso_smth.nii',
-                  '/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_09_up_aniso_smth.nii',
-                  '/home/john/Documents/20161221/func_regAcrssRuns_cube_up/func_10_up_aniso_smth.nii']  #noqa
+lstPathNiiFunc = ['/media/john/DATADRIVE1/MRI_Data_PhD/05_PacMan/20161221/nii_distcor/func_regAcrssRuns_cube_pRF_smth/func_07_up_aniso_smth_n3_k90_g0p2_down.nii.gz',
+                  '/media/john/DATADRIVE1/MRI_Data_PhD/05_PacMan/20161221/nii_distcor/func_regAcrssRuns_cube_pRF_smth/func_08_up_aniso_smth_n3_k90_g0p2_down.nii.gz',
+                  '/media/john/DATADRIVE1/MRI_Data_PhD/05_PacMan/20161221/nii_distcor/func_regAcrssRuns_cube_pRF_smth/func_09_up_aniso_smth_n3_k90_g0p2_down.nii.gz',
+                  '/media/john/DATADRIVE1/MRI_Data_PhD/05_PacMan/20161221/nii_distcor/func_regAcrssRuns_cube_pRF_smth/func_10_up_aniso_smth_n3_k90_g0p2_down.nii.gz']  #noqa
 
 # Path of mask (to restrict pRF model finding):
-strPathNiiMask = '/home/john/Documents/20161221/retinotopy/mask/20161221_mp2rage_seg_v26_gm.nii.gz'  #noqa
+strPathNiiMask = '/media/john/DATADRIVE1/MRI_Data_PhD/05_PacMan/20161221/nii_distcor/retinotopy/mask/apprxmt_gm_down.nii.gz'  #noqa
 
 # Output basename:
-strPathOut = '/home/john/Documents/20161221/retinotopy/pRF_results_motion/pRF_results'  #noqa
+strPathOut = '/media/john/DATADRIVE1/MRI_Data_PhD/05_PacMan/20161221/nii_distcor/retinotopy/pRF_results/pRF_results'  #noqa
 
 # Which version to use for pRF finding. 'numpy' or 'cython' for pRF finding on
 # CPU, 'gpu' for using GPU.
@@ -105,7 +105,7 @@ lgcCrteMdl = False
 # Basename of the 'binary stimulus files'. The files need to be in png
 # format and number in the order of their presentation during the
 # experiment.
-strPathPng = '/home/john/Documents/20161221/retinotopy/pRF_stimuli/frame_'  #noqa
+strPathPng = '~/frame_'  #noqa
 
 # Start index of PNG files. For instance, `varStrtIdx = 0` if the name of
 # the first PNG file is `file_000.png`, or `varStrtIdx = 1` if it is
@@ -119,7 +119,7 @@ varZfill = 3
 
 # Path to npy file with pRF time course models (to save or laod). Without file
 # extension.
-strPathMdl = '/home/john/Documents/20161221/retinotopy/design_matrix/pRF_timecourses'  #noqa
+strPathMdl = '/media/john/DATADRIVE1/MRI_Data_PhD/05_PacMan/20161221/nii_distcor/retinotopy/design_matrix/pRF_timecourses'  #noqa
 
 # List with paths of pickles with information about experimental design (order
 # of stimuli). Only needed for motion_log.py (in order to create PNGs for
